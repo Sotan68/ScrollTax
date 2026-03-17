@@ -211,8 +211,12 @@
                 <span class="val" id="daysLost">45.6</span>
             </div>
             <div class="mini-stat">
-                <span class="label">LIFE LEAK RATIO</span>
+                <span class="label">DAILY TAX RATE</span>
                 <span class="val" id="lifeLeak">12.5%</span>
+            </div>
+            <div class="mini-stat">
+                <span class="label">THUMB DISTANCE</span>
+                <span class="val" id="thumbMileage">219 km</span>
             </div>
         </div>
     </div>
@@ -237,19 +241,109 @@
     let currentFactIndex = 0;
 
     const facts = [
-        { text: "In that time, you could've learned <b>Japanese</b> to a conversational level <b>{n}</b> times.", cost: 600, icon: "🎎" },
-        { text: "You could've completed <b>Harvard's CS50</b> coding course <b>{n}</b> times.", cost: 80, icon: "👨‍💻" },
-        { text: "You could've read <b>{n}</b> life-changing books. You'd be the smartest person in the room.", cost: 15, icon: "📚" },
-        { text: "You could've earned a <b>Private Pilot License</b> <b>{n}</b> times. Flying > Scrolling.", cost: 50, icon: "✈️" },
-        { text: "You could've mastered <b>Python</b> and automated your life <b>{n}</b> times.", cost: 150, icon: "🐍" },
-        { text: "You could've gained <b>{n} kg of pure muscle</b>. Stop being a 'before' picture.", cost: 150, icon: "🦾" },
-        { text: "You could've done <b>{n},000 pushups</b>. You'd be built like a Greek God.", cost: 0.01, icon: "🔱" },
-        { text: "You could've bought <b>{n} Pepperoni Pizzas</b> with the money you *didn't* earn.", cost: 0.75, icon: "🍕" },
-        { text: "You've lost enough time to watch <b>One Piece</b> <b>{n}</b> times. All of it.", cost: 450, icon: "🏴‍☠️" },
-        { text: "You could've earned enough to buy <b>{n}</b> brand new <b>Teslas</b>.", cost: 2000, icon: "🚗" },
-        { text: "You could've explained the <b>entire plot of FNAF</b> <b>{n}</b> times.", cost: 10, icon: "🐻" },
-        { text: "You could've learned to <b>Forge a Samurai Sword</b> <b>{n}</b> times. Sharp.", cost: 80, icon: "🗡️" }
-    ];
+    // --- THE "PRODUCTIVE LEGEND" (Skills & Brain) ---
+    { text: "In that time, you could've learned <b>Japanese</b> to a conversational level - <b>{n}</b> times.", cost: 600, icon: "🎎" },
+    { text: "You could've completed <b>Harvard's CS50</b> coding course - <b>{n}</b> times. Imagine the salary.", cost: 80, icon: "👨‍💻" },
+    { text: "You could've read <b>{n}</b> life-changing books. You'd be the smartest person in the room.", cost: 15, icon: "📚" },
+    { text: "You could've earned a <b>Private Pilot License</b> - <b>{n}</b> times. Flying > Scrolling.", cost: 50, icon: "✈️" },
+    { text: "You could've learned to <b>play the Piano</b> well enough to impress a crowd - <b>{n}</b> times.", cost: 400, icon: "🎹" },
+    { text: "You could've mastered <b>Python</b> and automated your entire life - <b>{n}</b> times.", cost: 150, icon: "🐍" },
+    { text: "You could've learned to <b>cook like a Michelin-star chef</b> - <b>{n}</b> times over.", cost: 120, icon: "👨‍🍳" },
+    { text: "You could've finished a <b>Master's Degree</b> - <b>{n}</b> times. Call yourself 'Professor' already.", cost: 1000, icon: "🎓" },
+    { text: "You could've learned <b>Touch Typing</b> - <b>{n}</b> times. You'd be a keyboard wizard.", cost: 15, icon: "⌨️" },
+    { text: "You could've mastered <b>Public Speaking</b> - <b>{n}</b> times. No more shaky knees.", cost: 50, icon: "🎤" },
+    { text: "You could've learned <b>Speed Reading</b> - <b>{n}</b> times. You'd be done with this list by now.", cost: 20, icon: "⚡" },
+    { text: "You could've learned to <b>DJ a festival set</b> - <b>{n}</b> times. Put the phone down, pick up the decks.", cost: 100, icon: "🎧" },
+    { text: "You could've learned <b>Sign Language</b> - <b>{n}</b> times and talked with your hands.", cost: 300, icon: "🤟" },
+    { text: "You could've mastered <b>Chess</b> well enough to beat a grandmaster - <b>{n}</b> times (maybe).", cost: 1500, icon: "♟️" },
+    { text: "You could've learned to <b>animate in 3D</b> - <b>{n}</b> times. You could be making movies.", cost: 400, icon: "🎬" },
+    { text: "You could've learned <b>Digital Marketing</b> - <b>{n}</b> times and escaped the 9-to-5.", cost: 100, icon: "📈" },
+    { text: "You could've mastered <b>Photography</b> - <b>{n}</b> times. Your Instagram would actually be good.", cost: 80, icon: "📸" },
+
+    // --- THE "PHYSICAL REPUTATION" (Fitness & Health) ---
+    { text: "You could've gained <b>{n} kg of pure muscle</b> and finally bought shirts that actually fit.", cost: 150, icon: "🦾" },
+    { text: "You could've trained for and run a <b>Full Marathon</b> - <b>{n}</b> times. Your heart misses you.", cost: 120, icon: "🏃‍♂️" },
+    { text: "You could've completed <b>{n}</b> '7-minute workouts'. You'd have abs, not just a thumb cramp.", cost: 0.12, icon: "🏋️‍♂️" },
+    { text: "You could've learned to <b>Backflip</b> - <b>{n}</b> times. Think of the gravity-defying glory.", cost: 40, icon: "🤸‍♂️" },
+    { text: "You could've walked from <b>London to Rome</b> - <b>{n}</b> times. Stand up, your legs are atrophying.", cost: 350, icon: "🚶🏻‍➡️" },
+    { text: "You could've mastered a <b>Handstand</b> - <b>{n}</b> times. The world looks better upside down.", cost: 50, icon: "🤸" },
+    { text: "You could've learned to <b>Surf</b> - <b>{n}</b> times. You're a beach bum in a gamer's body.", cost: 60, icon: "🏄‍♂️" },
+    { text: "You could've done <b>{n} pushups</b>. You'd be built like a Greek God.", cost: 0.01, icon: "🔱" },
+    { text: "You could've hiked the <b>Appalachian Trail</b> - <b>{n}</b> times. Nature > Pixels.", cost: 2000, icon: "🏔️" },
+    { text: "You could've learned to <b>Box</b> - <b>{n}</b> times. You'd be the dangerous one in the room.", cost: 200, icon: "🥊" },
+    { text: "You could've completed <b>{n} Yoga 30-day challenges</b>. You'd be as flexible as a noodle.", cost: 15, icon: "🧘‍♂️" },
+    { text: "You could've learned to <b>Skateboard</b> - <b>{n}</b> times. Do a kickflip, bro.", cost: 100, icon: "🛹" },
+    { text: "You could've swam the <b>English Channel</b> - <b>{n}</b> times. (Well, with a boat following).", cost: 20, icon: "🏊‍♂️" },
+    { text: "You could've biked across the <b>USA</b> - <b>{n}</b> times. Your quads would be legendary.", cost: 400, icon: "🚲" },
+    { text: "You could've learned <b>Jiu-Jitsu</b> well enough to be a blue belt - <b>{n}</b> times.", cost: 500, icon: "🥋" },
+
+    // --- THE "FINANCIAL REGRET" (Money & Spending) ---
+    { text: "You could've earned <b>${n}</b> working a basic side hustle. Think of the freedom.", cost: 0.05, icon: "💰" },
+    { text: "You could've bought <b>{n} Pepperoni Pizzas</b> with the money you *didn't* earn.", cost: 0.75, icon: "🍕" },
+    { text: "You could've bought <b>{n} pairs of Air Jordan 1s</b>. You'd have a sneaker wall.", cost: 10, icon: "👟" },
+    { text: "You could've paid for <b>{n}</b> years of <b>Netflix</b> by working instead of scrolling.", cost: 8, icon: "📺" },
+    { text: "You've lost enough money to buy <b>{n}</b> fully-loaded <b>MacBook Pros</b>.", cost: 150, icon: "💻" },
+    { text: "You could've funded <b>{n}</b> round-trip flights to <b>Bali</b>.", cost: 40, icon: "🏝️" },
+    { text: "You've lost enough time to earn <b>{n}</b> luxury <b>Rolex</b> watches.", cost: 500, icon: "⌚" },
+    { text: "You could've bought <b>{n}</b> shares of <b>Apple stock</b> and retired slightly earlier.", cost: 10, icon: "🍏" },
+    { text: "You could've paid for <b>{n}</b> months of a <b>Luxury Penthouse</b> in New York.", cost: 200, icon: "🏙️" },
+    { text: "You could've bought <b>{n}</b> brand new <b>Teslas</b>. Zero emissions, zero scrolling.", cost: 2000, icon: "🚗" },
+    { text: "You could've earned enough to buy <b>{n}</b> high-end <b>Espresso Machines</b>.", cost: 30, icon: "☕" },
+    { text: "You could've paid off <b>{n}%</b> of an average student loan.", cost: 50, icon: "💸" },
+    { text: "You could've bought <b>{n}</b> vintage <b>Arcade Cabinets</b>. Real gaming > Mobile scrolling.", cost: 25, icon: "🕹️" },
+
+    // --- THE "ENTERTAINMENT & POP CULTURE" ---
+    { text: "You could've watched the entire <b>Shrek</b> series - <b>{n}</b> times. Peak happiness.", cost: 8, icon: "👹" },
+    { text: "You could've watched the entire <b>Marvel Cinematic Universe</b> - <b>{n}</b> times.", cost: 60, icon: "🦸‍♂️" },
+    { text: "You could've played through <b>The Witcher 3</b> - <b>{n}</b> times. Geralt is disappointed.", cost: 100, icon: "🐺" },
+    { text: "You could've watched <b>The Bee Movie</b> - <b>{n}</b> times. According to all known laws of aviation...", cost: 1.5, icon: "🐝" },
+    { text: "You could've watched the <b>Lord of the Rings Extended Edition</b> - <b>{n}</b> times.", cost: 12, icon: "💍" },
+    { text: "You could've watched every episode of <b>One Piece</b> - <b>{n}</b> times. Yes, all of them.", cost: 450, icon: "🏴‍☠️" },
+    { text: "You could've watched <b>Interstellar</b> - <b>{n}</b> times. This little maneuver is costing us 51 years.", cost: 3, icon: "👨‍🚀" },
+    { text: "You could've listened to <b>'Never Gonna Give You Up'</b> - <b>{n}</b> times. Rickrolled by life.", cost: 0.06, icon: "🕺" },
+    { text: "You could've watched <b>The Godfather Trilogy</b> - <b>{n}</b> times and finally understood the hype.", cost: 9, icon: "🌹" },
+
+    // --- THE "ABSURD & FUNNY" (The Roasts) ---
+    { text: "You could've stared at a <b>Blank Wall</b> for <b>{n}</b> hours and been more productive.", cost: 1, icon: "🧱" },
+    { text: "You could've folded <b>{n}</b> origami cranes. Legend says you'd get a wish. You need it.", cost: 0.1, icon: "🦢" },
+    { text: "You could've counted to <b>{n}</b> million. Just... counting. Out loud.", cost: 300, icon: "🔢" },
+    { text: "You could've watched <b>{n}</b> sunsets. But you chose a 6-inch glowing rectangle.", cost: 0.5, icon: "🌅" },
+    { text: "You could've organized your <b>junk drawer</b> - <b>{n}</b> times. You know the one.", cost: 2, icon: "📎" },
+    { text: "You could've built <b>{n}</b> complex <b>Lego Death Stars</b>. You'd have a cool display at least.", cost: 20, icon: "🧱" },
+    { text: "You could've knitted <b>{n}</b> very long, very ugly sweaters for your neighbors.", cost: 12, icon: "🧶" },
+    { text: "You could've learned to <b>Solve a Rubik's Cube</b> - <b>{n}</b> times. Impressive at parties, maybe.", cost: 5, icon: "🎲" },
+    { text: "You could've cleaned your <b>browser history</b> - <b>{n}</b> times. We know why.", cost: 0.5, icon: "🕵️‍♂️" },
+    { text: "You could've explained the <b>entire plot of Five Nights at Freddy's</b> - <b>{n}</b> times.", cost: 10, icon: "🐻" },
+    { text: "You could've spent <b>{n}</b> hours actually sleeping. Your dark circles are screaming.", cost: 1, icon: "😴" },
+    { text: "You could've grown a <b>Bonsai Tree</b> for <b>{n}</b> hours. It takes patience you clearly don't have.", cost: 50, icon: "🌳" },
+    { text: "You could've practiced <b>Moonwalking</b> until you were smoother than Michael Jackson - <b>{n}</b> times.", cost: 30, icon: "👞" },
+    { text: "You could've built <b>{n}</b> successful <b>Minecraft</b> civilizations.", cost: 100, icon: "⛏️" },
+    { text: "You could've walked to the <b>Gym and back</b> - <b>{n}</b> times. It's only 1 mile away, bro.", cost: 0.5, icon: "🏋️" },
+
+    // --- THE "WORLD-CLASS ACHIEVEMENTS" ---
+    { text: "You could've built <b>{n}</b> profitable <b>SaaS companies</b>. Instead, you're a product.", cost: 500, icon: "🚀" },
+    { text: "You could've learned to <b>Forge a Samurai Sword</b> - <b>{n}</b> times. Sharp.", cost: 80, icon: "🗡️" },
+    { text: "You could've learned to <b>Tame a Falcon</b> - <b>{n}</b> times. Why walk when you can fly?", cost: 200, icon: "🦅" },
+    { text: "You could've built <b>{n}</b> custom <b>Mechanical Keyboards</b>. Clicky and expensive.", cost: 5, icon: "⌨️" },
+    { text: "You could've written <b>{n}</b> hit pop songs. You'd be the next Taylor Swift.", cost: 100, icon: "🎸" },
+    { text: "You could've mastered <b>Espresso Latte Art</b> - <b>{n}</b> times. Your milk foam is currently a mess.", cost: 40, icon: "☕" },
+    { text: "You could've learned <b>Lockpicking</b> - <b>{n}</b> times. (For legal purposes, obviously).", cost: 20, icon: "🔓" },
+    { text: "You could've mastered the <b>Yo-Yo</b> - <b>{n}</b> times. It's making a comeback, trust me.", cost: 10, icon: "🪀" },
+    { text: "You could've learned to <b>Brew your own Beer</b> - <b>{n}</b> times. Drink your regrets.", cost: 50, icon: "🍺" },
+    { text: "You could've learned <b>Calligraphy</b> and written <b>{n}</b> fancy wedding invites.", cost: 30, icon: "✒️" },
+    { text: "You could've mastered <b>Card Counting</b> and been banned from <b>{n}</b> casinos.", cost: 100, icon: "🃏" },
+    { text: "You could've learned to <b>Unicycle</b> - <b>{n}</b> times. Perfect for your circus life.", cost: 15, icon: "🚲" },
+    { text: "You could've mastered <b>Nunchucks</b> - <b>{n}</b> times. Please don't hit your own head.", cost: 40, icon: "🥋" },
+    { text: "You could've learned to <b>Whistle with your fingers</b> - <b>{n}</b> times. Very loud.", cost: 2, icon: "😙" },
+    { text: "You could've memorized every <b>Capital City</b> in the world - <b>{n}</b> times.", cost: 10, icon: "🗺️" },
+    { text: "You could've learned to <b>Identify Birds by their song</b> - <b>{n}</b> times. A true druid.", cost: 50, icon: "🦜" },
+    { text: "You could've learned <b>Glassblowing</b> - <b>{n}</b> times. Hot and dangerous.", cost: 150, icon: "🔥" },
+    { text: "You could've mastered <b>Pottery</b> - <b>{n}</b> times. Ghost (1990) vibes.", cost: 100, icon: "🏺" },
+    { text: "You could've learned to <b>Sail a boat</b> - <b>{n}</b> times. Captain of your own destiny.", cost: 80, icon: "⛵" },
+    { text: "You could've mastered <b>Tax Loopholes</b> - <b>{n}</b> times and saved a fortune.", cost: 60, icon: "⚖️" },
+    { text: "You could've learned to <b>Read Tarot cards</b> - <b>{n}</b> times. The future looks... blurry.", cost: 20, icon: "🔮" },
+    { text: "You could've mastered <b>Origami</b> well enough to fold a life-sized dragon - <b>{n}</b> times.", cost: 200, icon: "🐉" }
+];
 
     function setHorizon(days, element) {
         currentHorizon = days;
@@ -272,10 +366,11 @@
         const totalHours = daily * currentHorizon;
         const fact = facts[currentFactIndex];
         
-        // --- NEW CALCULATIONS ---
+        // --- NEW CALCULATIONS (METRIC) ---
         const daysLost = (totalHours / 24).toFixed(1);
         const money = (totalHours * 20).toLocaleString();
         const leak = ((daily / 24) * 100).toFixed(1);
+        const distanceKm = (totalHours * 0.2).toFixed(1); // 0.2 km per hour of scrolling
 
         // --- INJECTING DATA ---
         document.getElementById('hourLabel').innerText = daily + "h";
@@ -283,6 +378,7 @@
         document.getElementById('moneyLost').innerText = "$" + money;
         document.getElementById('daysLost').innerText = daysLost;
         document.getElementById('lifeLeak').innerText = leak + "%";
+        document.getElementById('thumbMileage').innerText = distanceKm + " km";
 
         const intensity = (daily / 12) * 100;
         
