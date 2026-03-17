@@ -88,7 +88,7 @@
         .bento-container {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            grid-template-rows: auto auto;
+            grid-template-rows: auto auto auto;
             gap: 20px;
             max-width: 1000px;
             width: 95%;
@@ -163,6 +163,14 @@
         }
         .btn-shuffle:hover { background: var(--primary); transform: scale(1.02); }
 
+        /* SHARE BUTTON STYLE */
+        .btn-share {
+            background: transparent; color: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 20px;
+            font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-share:hover { background: var(--primary); color: #020617; border-color: var(--primary); }
+
         @keyframes jolt { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
         .jolt-effect { animation: jolt 0.2s ease-in-out; }
 
@@ -234,6 +242,10 @@
         <p id="statusText" style="font-weight:700; color:var(--primary); margin:10px 0;">Productive Potato</p>
         <div class="rank-bar"><div id="rankFill"></div></div>
     </div>
+
+    <div class="card" style="padding: 10px;">
+        <button class="btn-share" onclick="copyAudit()">Share Audit</button>
+    </div>
 </div>
 
 <script>
@@ -279,7 +291,7 @@
 
     // --- THE "FINANCIAL REGRET" (Money & Spending) ---
     { text: "You could've earned <b>${n}</b> working a basic side hustle. Think of the freedom.", cost: 0.05, icon: "💰" },
-    { text: "You could've bought <b>{n} Pepperoni Pizzas</b> with the money you *didn't* earn.", cost: 0.75, icon: "🍕" },
+    { text: "You could've bought <b>{n} Pepperoni Pizzas</b> with the money you <b>didn't</b> earn.", cost: 0.75, icon: "🍕" },
     { text: "You could've bought <b>{n} pairs of Air Jordan 1s</b>. You'd have a sneaker wall.", cost: 10, icon: "👟" },
     { text: "You could've paid for <b>{n}</b> years of <b>Netflix</b> by working instead of scrolling.", cost: 8, icon: "📺" },
     { text: "You've lost enough money to buy <b>{n}</b> fully-loaded <b>MacBook Pros</b>.", cost: 150, icon: "💻" },
@@ -343,7 +355,7 @@
     { text: "You could've mastered <b>Tax Loopholes</b> - <b>{n}</b> times and saved a fortune.", cost: 60, icon: "⚖️" },
     { text: "You could've learned to <b>Read Tarot cards</b> - <b>{n}</b> times. The future looks... blurry.", cost: 20, icon: "🔮" },
     { text: "You could've mastered <b>Origami</b> well enough to fold a life-sized dragon - <b>{n}</b> times.", cost: 200, icon: "🐉" }
-];
+    ];
 
     function setHorizon(days, element) {
         currentHorizon = days;
@@ -366,13 +378,11 @@
         const totalHours = daily * currentHorizon;
         const fact = facts[currentFactIndex];
         
-        // --- NEW CALCULATIONS (METRIC) ---
         const daysLost = (totalHours / 24).toFixed(1);
         const money = (totalHours * 20).toLocaleString();
         const leak = ((daily / 24) * 100).toFixed(1);
-        const distanceKm = (totalHours * 0.2).toFixed(1); // 0.2 km per hour of scrolling
+        const distanceKm = (totalHours * 0.2).toFixed(1);
 
-        // --- INJECTING DATA ---
         document.getElementById('hourLabel').innerText = daily + "h";
         document.getElementById('annualHours').innerText = Math.floor(totalHours).toLocaleString();
         document.getElementById('moneyLost').innerText = "$" + money;
@@ -382,7 +392,6 @@
 
         const intensity = (daily / 12) * 100;
         
-        // --- THEME ENGINE ---
         let status = "";
         let themePrimary = "";
         let themeSecondary = "";
@@ -423,10 +432,32 @@
         document.getElementById('lifeBar').style.width = intensity + "%";
         document.getElementById('rankFill').style.width = intensity + "%";
         
-        // --- UPDATE ROAST ---
         let result = fact.text.includes("$") ? (totalHours * 20).toLocaleString() : (totalHours / fact.cost).toFixed(1);
         document.getElementById('factOutput').innerHTML = fact.text.replace("{n}", result);
         document.getElementById('roastIcon').innerText = fact.icon || "⚡";
+    }
+
+    // --- SHARE FUNCTION ---
+    function copyAudit() {
+        const hours = document.getElementById('annualHours').innerText;
+        const money = document.getElementById('moneyLost').innerText;
+        const rank = document.getElementById('statusText').innerText;
+        const leak = document.getElementById('lifeLeak').innerText;
+        const dist = document.getElementById('thumbMileage').innerText;
+
+        const report = `📊 MY SCROLLTAX AUDIT:\n\n` +
+                       `🏆 Rank: ${rank}\n` +
+                       `⏰ Time Lost: ${hours} hours\n` +
+                       `💸 Money Lost: ${money}\n` +
+                       `📉 Daily Tax: ${leak}\n` +
+                       `👆 Thumb Distance: ${dist}\n\n` +
+                       `Audit your life at ScrollTax.app`;
+
+        navigator.clipboard.writeText(report);
+        const btn = document.querySelector('.btn-share');
+        const original = btn.innerText;
+        btn.innerText = "COPIED! 🚀";
+        setTimeout(() => btn.innerText = original, 2000);
     }
 
     updateUI();
