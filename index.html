@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScrollTax | Premium Life Dashboard</title>
+    <title>ScrollTax | The Doomscroll Calculator</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -251,6 +252,27 @@
 <script>
     let currentHorizon = 365;
     let currentFactIndex = 0;
+    let lastRank = ""; // ADDED FOR SOUND TRIGGER
+
+    // --- NEW: THE NATIVE SOUND ENGINE ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, type, duration, vol=0.1) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+    function playTick() { playTone(800, 'sine', 0.1, 0.03); }
+    function playShuffle() { playTone(300, 'triangle', 0.15, 0.1); setTimeout(()=>playTone(450, 'triangle', 0.2, 0.1), 100); }
+    function playDing() { playTone(900, 'sine', 0.4, 0.1); setTimeout(()=>playTone(1200, 'sine', 0.6, 0.1), 150); }
+    function playAlarm() { playTone(150, 'sawtooth', 0.8, 0.2); }
 
     const facts = [
     // --- THE "PRODUCTIVE LEGEND" (Skills & Brain) ---
@@ -358,6 +380,7 @@
     ];
 
     function setHorizon(days, element) {
+        playTick(); // SOUND TRIGGER ADDED
         currentHorizon = days;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         element.classList.add('active');
@@ -365,6 +388,7 @@
     }
 
     function shuffle() {
+        playShuffle(); // SOUND TRIGGER ADDED
         const card = document.getElementById('roastCard');
         card.classList.remove('jolt-effect');
         void card.offsetWidth;
@@ -422,6 +446,12 @@
             overlayOpacity = 1;
         }
 
+        // --- NEW: TRIGGER ALARM FOR "BRAIN ROT CHAMPION" ---
+        if (status === "Brain Rot Champion" && lastRank !== "Brain Rot Champion") {
+            playAlarm();
+        }
+        lastRank = status;
+
         const root = document.documentElement;
         root.style.setProperty('--primary', themePrimary);
         root.style.setProperty('--secondary', themeSecondary);
@@ -439,6 +469,7 @@
 
     // --- SHARE FUNCTION ---
     function copyAudit() {
+        playDing(); // SOUND TRIGGER ADDED
         const hours = document.getElementById('annualHours').innerText;
         const money = document.getElementById('moneyLost').innerText;
         const rank = document.getElementById('statusText').innerText;
@@ -456,9 +487,12 @@
         navigator.clipboard.writeText(report);
         const btn = document.querySelector('.btn-share');
         const original = btn.innerText;
-        btn.innerText = "COPIED! 🚀";
+        btn.innerText = "COPIED TO CLIPBOARD! 🚀";
         setTimeout(() => btn.innerText = original, 2000);
     }
+
+    // --- NEW: SLIDER SOUND LISTENER ---
+    document.getElementById('hourInput').addEventListener('input', playTick);
 
     updateUI();
 </script>
