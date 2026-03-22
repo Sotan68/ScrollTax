@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ScrollTax | The Doomscroll Calculator</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
     <style>
-        :root { 
-            --primary: #00f2ff; 
-            --secondary: #7000ff; 
+        :root {
+            --primary: #00f2ff;
+            --secondary: #7000ff;
             --danger: #ff4757;
-            --bg: #020617; 
+            --bg: #020617;
             --surface: rgba(15, 23, 42, 0.4);
             --border: rgba(255, 255, 255, 0.08);
         }
-        
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg);
-            color: #f8fafc; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
+            color: #f8fafc;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -31,11 +33,15 @@
         /* --- BACKGROUND SYSTEM --- */
         .bg-glow {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: -1;
             background: var(--bg);
             overflow: hidden;
         }
+
         .bg-glow::before {
             content: "";
             position: absolute;
@@ -46,75 +52,171 @@
             z-index: 2;
             pointer-events: none;
         }
-        .danger-overlay {
+
+        #particleCanvas {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 0% 0%, #450a0a 0%, #020617 100%);
-            opacity: 0;
-            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .grid-overlay {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
-            -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
-            z-index: 1;
-        }
-        .blob {
-            position: absolute;
-            width: 800px; height: 800px;
-            background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
-            filter: blur(120px);
-            opacity: 0.08;
-            border-radius: 50%;
-            animation: move 25s infinite alternate ease-in-out;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 0;
         }
-        .blob:nth-child(3) { 
-            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
-            left: 50%; top: -10%; 
-            width: 1000px;
-       }
 
-       /* --- CUSTOM BENTO MODAL --- */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(2, 6, 23, 0.8);
-    backdrop-filter: blur(10px);
-    display: none; /* Hidden by default */
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 32px;
-    padding: 40px;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    transform: translateY(20px);
-    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.modal-overlay.active { display: flex; }
-.modal-overlay.active .modal-card { transform: translateY(0); }
-
-.modal-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 15px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
-.modal-body { font-size: 1rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; }
-
-        @keyframes move {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(5vw, -5vh) scale(1); }
+        /* --- CUSTOM BENTO MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
+
+        .modal-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-body {
+            font-size: 1rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        /* --- CONTACT FORM MODAL --- */
+        .contact-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .contact-overlay.active {
+            display: flex;
+        }
+
+        .contact-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .contact-overlay.active .contact-card {
+            transform: translateY(0);
+        }
+
+        .contact-card input,
+        .contact-card textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+
+        .contact-card input:focus,
+        .contact-card textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .contact-card input::placeholder,
+        .contact-card textarea::placeholder {
+            color: #64748b;
+        }
+
+        .contact-card textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .contact-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .contact-btns button {
+            flex: 1;
+            padding: 15px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            border: none;
+        }
+
+        .btn-send {
+            background: #fff;
+            color: #020617;
+        }
+
+        .btn-send:hover {
+            background: var(--primary);
+            transform: scale(1.02);
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: #cbd5e1;
+            border: 1px solid var(--border) !important;
+        }
+
+        .btn-cancel:hover {
+            border-color: var(--primary) !important;
+            color: #fff;
+        }
+
+
 
         /* --- BENTO LAYOUT --- */
         .bento-container {
@@ -139,9 +241,19 @@
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 30px rgba(0, 242, 255, 0.1); }
-        .col-2 { grid-column: span 2; }
-        .row-2 { grid-row: span 2; }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 242, 255, 0.1);
+        }
+
+        .col-2 {
+            grid-column: span 2;
+        }
+
+        .row-2 {
+            grid-row: span 2;
+        }
 
         /* HEADER POLISH */
         .header-area {
@@ -150,8 +262,23 @@
             gap: 5px;
             margin-bottom: 10px;
         }
-        h1 { font-size: 2rem; margin: 0; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
-        .tagline { font-size: 0.85rem; font-weight: 600; color: #64748b; margin: 0; opacity: 0.8; }
+
+        h1 {
+            font-size: 2rem;
+            margin: 0;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .tagline {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            margin: 0;
+            opacity: 0.8;
+        }
 
         /* DATA GRID INSIDE TAX CARD */
         .tax-grid {
@@ -162,428 +289,825 @@
             padding-top: 15px;
             border-top: 1px solid var(--border);
         }
-        .mini-stat { display: flex; flex-direction: column; }
-        .mini-stat .label { font-size: 0.6rem; font-weight: 800; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; }
-        .mini-stat .val { font-size: 1.1rem; font-weight: 700; color: var(--primary); transition: color 0.3s; }
-        
+
+        .mini-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mini-stat .label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .mini-stat .val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            transition: color 0.3s;
+        }
+
         /* SLIDER & TABS */
-        .tabs { display: flex; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 12px; margin: 20px 0; }
-        .tab { flex: 1; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; font-weight: 700; color: #64748b; text-align: center; transition: 0.2s; }
-        .tab.active { background: #1e293b; color: var(--primary); }
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
 
-        input[type=range] { width: 100%; height: 6px; border-radius: 10px; background: #1e293b; -webkit-appearance: none; margin: 15px 0; outline: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #fff; border-radius: 50%; box-shadow: 0 0 15px var(--primary); cursor: pointer; }
+        .tab {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #64748b;
+            text-align: center;
+            transition: 0.2s;
+        }
 
-        .progress-container { height: 8px; background: #1e293b; border-radius: 10px; overflow: hidden; margin-top: 10px; }
-        #lifeBar { height: 100%; width: 30%; background: var(--primary); transition: 0.5s ease; }
+        .tab.active {
+            background: #1e293b;
+            color: var(--primary);
+        }
 
-        .tax-main { font-size: 3.8rem; font-weight: 800; line-height: 1; color: #fff; margin: 10px 0; }
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            background: #1e293b;
+            -webkit-appearance: none;
+            margin: 15px 0;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary);
+            cursor: pointer;
+        }
+
+        .progress-container {
+            height: 8px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        #lifeBar {
+            height: 100%;
+            width: 30%;
+            background: var(--primary);
+            transition: 0.5s ease;
+        }
+
+        .tax-main {
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1;
+            color: #fff;
+            margin: 10px 0;
+        }
 
         /* ROAST CONTENT */
-        .roast-layout { display: grid; grid-template-columns: 80px 1fr; gap: 20px; align-items: center; text-align: left; min-height: 120px; }
-        .roast-icon { font-size: 3.5rem; display: flex; align-items: center; justify-content: center; }
-        .roast-text { font-size: 1.3rem; line-height: 1.4; color: #cbd5e1; }
-        .roast-text b { color: var(--primary); font-size: 1.6rem; }
+        .roast-layout {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 20px;
+            align-items: center;
+            text-align: left;
+            min-height: 120px;
+        }
 
-        .rank-bar { height: 4px; width: 100%; background: #1e293b; border-radius: 10px; margin-top: 15px; overflow: hidden; }
-        #rankFill { height: 100%; width: 30%; background: var(--primary); transition: 0.5s; }
+        .roast-icon {
+            font-size: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .roast-text {
+            font-size: 1.3rem;
+            line-height: 1.4;
+            color: #cbd5e1;
+        }
+
+        .roast-text b {
+            color: var(--primary);
+            font-size: 1.6rem;
+        }
+
+        .rank-bar {
+            height: 4px;
+            width: 100%;
+            background: #1e293b;
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        #rankFill {
+            height: 100%;
+            width: 30%;
+            background: var(--primary);
+            transition: 0.5s;
+        }
 
         .btn-shuffle {
-            background: #fff; color: #020617; border: none; padding: 18px; border-radius: 20px;
-            font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 25px;
-            text-transform: uppercase; letter-spacing: 1px; width: 100%;
+            background: #fff;
+            color: #020617;
+            border: none;
+            padding: 18px;
+            border-radius: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
         }
-        .btn-shuffle:hover { background: var(--primary); transform: scale(1.02); }
+
+        .btn-shuffle:hover {
+            background: var(--primary);
+            transform: scale(1.02);
+        }
 
         /* SHARE BUTTON STYLE */
         .btn-share {
-            background: transparent; color: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 20px;
-            font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
-            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .btn-share:hover { background: var(--primary); color: #020617; border-color: var(--primary); }
 
-        @keyframes jolt { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        .jolt-effect { animation: jolt 0.2s ease-in-out; }
+        .btn-share:hover {
+            background: var(--primary);
+            color: #020617;
+            border-color: var(--primary);
+        }
 
-        @media (max-width: 768px) { .bento-container { grid-template-columns: 1fr; } .col-2, .row-2 { grid-column: span 1; } .roast-layout { grid-template-columns: 1fr; text-align: center; } }
+        @keyframes jolt {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.03);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .jolt-effect {
+            animation: jolt 0.2s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .bento-container {
+                grid-template-columns: 1fr;
+            }
+
+            .col-2,
+            .row-2 {
+                grid-column: span 1;
+            }
+
+            .roast-layout {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<div class="bg-glow">
-    <div class="danger-overlay" id="dangerOverlay"></div>
-    <div class="blob"></div>
-    <div class="blob"></div>
-    <div class="grid-overlay"></div> 
-</div>
-
-<div class="bento-container">
-    <div class="card col-2">
-        <div class="header-area">
-            <h1>ScrollTax</h1>
-            <p class="tagline">Stop being controlled by the algorithm.</p>
-        </div>
-        <div class="tabs">
-            <div class="tab" onclick="setHorizon(30, this)">MONTH</div>
-            <div class="tab active" onclick="setHorizon(365, this)">YEAR</div>
-            <div class="tab" onclick="setHorizon(1825, this)">5 YEARS</div>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.8rem">
-            <span style="color:#64748b">DAILY USAGE</span>
-            <span id="hourLabel" style="color:var(--primary)">3h</span>
-        </div>
-        <input type="range" id="hourInput" min="1" max="12" value="3" oninput="updateUI()">
-        <div class="progress-container"><div id="lifeBar"></div></div>
+    <div class="bg-glow">
+        <canvas id="particleCanvas"></canvas>
     </div>
 
-    <div class="card">
-        <span style="font-size:0.7rem; font-weight:800; color:#64748b; letter-spacing: 1px;">TOTAL LOST HOURS</span>
-        <div class="tax-main" id="annualHours">1,095</div>
-        
-        <div class="tax-grid">
-            <div class="mini-stat">
-                <span class="label">MONEY TAX</span>
-                <span class="val" id="moneyLost">$21,900</span>
+    <div class="bento-container">
+        <div class="card col-2">
+            <div class="header-area">
+                <h1>ScrollTax</h1>
+                <p class="tagline">Stop being controlled by the algorithm.</p>
             </div>
-            <div class="mini-stat">
-                <span class="label">FULL DAYS LOST</span>
-                <span class="val" id="daysLost">45.6</span>
+            <div class="tabs">
+                <div class="tab" onclick="setHorizon(30, this)">MONTH</div>
+                <div class="tab active" onclick="setHorizon(365, this)">YEAR</div>
+                <div class="tab" onclick="setHorizon(1825, this)">5 YEARS</div>
             </div>
-            <div class="mini-stat">
-                <span class="label">DAILY TAX RATE</span>
-                <span class="val" id="lifeLeak">12.5%</span>
+            <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.8rem">
+                <span style="color:#64748b">DAILY USAGE</span>
+                <span id="hourLabel" style="color:var(--primary)">3h</span>
             </div>
-            <div class="mini-stat">
-                <span class="label">THUMB DISTANCE</span>
-                <span class="val" id="thumbMileage">219 km</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="card col-2 row-2" id="roastCard">
-        <div class="roast-layout">
-            <div class="roast-icon" id="roastIcon">🦾</div>
-            <div class="roast-text" id="factOutput">Calculating the damage...</div>
-        </div>
-        <button class="btn-shuffle" onclick="shuffle()">SHUFFLE REALITY</button>
-    </div>
-
-    <div class="card">
-        <span style="font-size:0.7rem; font-weight:800; color:#64748b">CURRENT RANK</span>
-        <p id="statusText" style="font-weight:700; color:var(--primary); margin:10px 0;">Productive Potato</p>
-        <div class="rank-bar"><div id="rankFill"></div></div>
-    </div>
-
-    <div class="card" style="padding: 10px;">
-        <button class="btn-share" onclick="copyAudit()">Share Audit</button>
-    </div>
-
-    <div class="card" style="grid-column: 1 / -1; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 20px 30px; margin-top: 10px;">
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.6rem; font-weight: 800; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">Community & Social</span>
-                <div style="display: flex; gap: 15px; align-items: center; margin-top: 5px;">
-                    <a href="https://www.instagram.com/scrolltaxapp/" target="_blank" style="color: #ffffff; line-height: 0;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                        </svg>
-                    </a>
-                    <a href="https://www.tiktok.com/@scrolltaxapp" target="_blank" style="color: #fff; line-height: 0;">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3V0Z"/></svg>
-                    </a>
-                  <span onclick="showContact()" style="color: #fff; cursor: pointer; text-decoration: none; font-size: 0.85rem; font-weight: 800; border-left: 1px solid var(--border); padding-left: 15px;">Contact</span>
-    
-</a>
+            <input type="range" id="hourInput" min="1" max="12" value="3" oninput="updateUI()">
+            <div class="progress-container">
+                <div id="lifeBar"></div>
             </div>
         </div>
 
-        <div style="flex: 1; padding: 0 40px; text-align: left; max-width: 400px;">
-            <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.5; font-weight: 500; opacity: 0.7;">
-                ScrollTax is an independent project designed to visualize digital decay. Every share helps wake another mind.
-            </p>
+        <div class="card">
+            <span style="font-size:0.7rem; font-weight:800; color:#64748b; letter-spacing: 1px;">TOTAL LOST HOURS</span>
+            <div class="tax-main" id="annualHours">1,095</div>
+
+            <div class="tax-grid">
+                <div class="mini-stat">
+                    <span class="label">MONEY TAX</span>
+                    <span class="val" id="moneyLost">$21,900</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="label">FULL DAYS LOST</span>
+                    <span class="val" id="daysLost">45.6</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="label">DAILY TAX RATE</span>
+                    <span class="val" id="lifeLeak">12.5%</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="label">THUMB DISTANCE</span>
+                    <span class="val" id="thumbMileage">219 km</span>
+                </div>
+            </div>
         </div>
 
-        <div style="display: flex; gap: 12px; align-items: center;">
-            <button onclick="showCredits()" style="background: transparent; border: 1px solid var(--border); color: #ffffff; padding: 10px 18px; border-radius: 30px; font-size: 0.65rem; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">Credits</button>
-            
-            <a href="https://buymeacoffee.com/scrolltax" target="_blank" style="background: #ffcc00; color: #000000; padding: 12px 25px; border-radius: 30px; font-weight: 800; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; box-shadow: 0 0 20px rgba(255, 204, 0, 0.3); transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Support ScrollTax</a>
+        <div class="card col-2 row-2" id="roastCard">
+            <div class="roast-layout">
+                <div class="roast-icon" id="roastIcon">🦾</div>
+                <div class="roast-text" id="factOutput">Calculating the damage...</div>
+            </div>
+            <button class="btn-shuffle" onclick="shuffle()">SHUFFLE REALITY</button>
         </div>
-    </div>
-</div>
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
-    <div class="modal-card" onclick="event.stopPropagation()">
-        <div id="modalIcon" style="font-size: 3rem; margin-bottom: 20px;">⚡</div>
-        <div class="modal-title" id="modalTitle">Title</div>
-        <p class="modal-body" id="modalBody">Description goes here.</p>
-        <button class="btn-shuffle" style="margin-top: 0;" onclick="closeModal()">Close</button>
-    </div>
-</div>
-<script>
-    let currentHorizon = 365;
-    let currentFactIndex = 0;
-    let lastRank = ""; 
 
-    // --- NATIVE SOUND ENGINE ---
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playTone(freq, type, duration, vol=0.1) {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-    }
-    function playTick() { playTone(800, 'sine', 0.1, 0.03); }
-    function playShuffle() { playTone(300, 'triangle', 0.15, 0.1); setTimeout(()=>playTone(450, 'triangle', 0.2, 0.1), 100); }
-    function playDing() { playTone(900, 'sine', 0.4, 0.1); setTimeout(()=>playTone(1200, 'sine', 0.6, 0.1), 150); }
-    function playAlarm() { playTone(150, 'sawtooth', 0.8, 0.2); }
+        <div class="card">
+            <span style="font-size:0.7rem; font-weight:800; color:#64748b">CURRENT RANK</span>
+            <p id="statusText" style="font-weight:700; color:var(--primary); margin:10px 0;">Productive Potato</p>
+            <div class="rank-bar">
+                <div id="rankFill"></div>
+            </div>
+        </div>
 
-      const facts = [
-    // --- THE "PRODUCTIVE LEGEND" (Skills & Brain) ---
-    { text: "In that time, you could've learned <b>Japanese</b> to a conversational level - <b>{n}</b> times.", cost: 600, icon: "🎎" },
-    { text: "You could've completed <b>Harvard's CS50</b> coding course - <b>{n}</b> times. Imagine the salary.", cost: 80, icon: "👨‍💻" },
-    { text: "You could've read <b>{n}</b> life-changing books. You'd be the smartest person in the room.", cost: 15, icon: "📚" },
-    { text: "You could've earned a <b>Private Pilot License</b> - <b>{n}</b> times. Flying > Scrolling.", cost: 50, icon: "✈️" },
-    { text: "You could've learned to <b>play the Piano</b> well enough to impress a crowd - <b>{n}</b> times.", cost: 400, icon: "🎹" },
-    { text: "You could've mastered <b>Python</b> and automated your entire life - <b>{n}</b> times.", cost: 150, icon: "🐍" },
-    { text: "You could've learned to <b>cook a meal like a Michelin-star chef</b> - <b>{n}</b> times over.", cost: 120, icon: "👨‍🍳" },
-    { text: "You could've finished a <b>Master's Degree</b> - <b>{n}</b> times. Call yourself 'Professor' already.", cost: 1000, icon: "🎓" },
-    { text: "You could've learned <b>Touch Typing</b> - <b>{n}</b> times. You'd be a keyboard wizard.", cost: 15, icon: "⌨️" },
-    { text: "You could've mastered <b>Public Speaking</b> - <b>{n}</b> times. No more shaky knees.", cost: 50, icon: "🎤" },
-    { text: "You could've learned <b>Speed Reading</b> - <b>{n}</b> times. You'd be done with this list by now.", cost: 20, icon: "⚡" },
-    { text: "You could've learned to <b>DJ a festival set</b> - <b>{n}</b> times. Put the phone down, pick up the decks.", cost: 100, icon: "🎧" },
-    { text: "You could've learned <b>Sign Language</b> - <b>{n}</b> times and talked with your hands.", cost: 300, icon: "🤟" },
-    { text: "You could've mastered <b>Chess</b> well enough to beat a grandmaster - <b>{n}</b> times (maybe).", cost: 1500, icon: "♟️" },
-    { text: "You could've learned to <b>animate in 3D</b> - <b>{n}</b> times. You could be making movies.", cost: 400, icon: "🎬" },
-    { text: "You could've learned <b>Digital Marketing</b> - <b>{n}</b> times and escaped the 9-to-5.", cost: 100, icon: "📈" },
-    { text: "You could've mastered <b>Photography</b> - <b>{n}</b> times. Your Instagram would actually be good.", cost: 80, icon: "📸" },
+        <div class="card" style="padding: 10px;">
+            <button class="btn-share" onclick="copyAudit()">Share Audit</button>
+        </div>
 
-    // --- THE "PHYSICAL REPUTATION" (Fitness & Health) ---
-    { text: "You could've gained <b>{n} kg of pure muscle</b> and finally bought shirts that actually fit.", cost: 150, icon: "🦾" },
-    { text: "You could've trained for and run a <b>Full Marathon</b> - <b>{n}</b> times. Your heart misses you.", cost: 120, icon: "🏃‍♂️" },
-    { text: "You could've completed <b>{n}</b> '7-minute workouts'. You'd have abs, not just a thumb cramp.", cost: 0.12, icon: "🏋️‍♂️" },
-    { text: "You could've learned to <b>Backflip</b> - <b>{n}</b> times. Think of the gravity-defying glory.", cost: 40, icon: "🤸‍♂️" },
-    { text: "You could've walked from <b>London to Rome</b> - <b>{n}</b> times. Stand up, your legs are atrophying.", cost: 350, icon: "🚶🏻‍➡️" },
-    { text: "You could've mastered a <b>Handstand</b> - <b>{n}</b> times. The world looks better upside down.", cost: 50, icon: "🤸" },
-    { text: "You could've learned to <b>Surf</b> - <b>{n}</b> times. You're a beach bum in a gamer's body.", cost: 60, icon: "🏄‍♂️" },
-    { text: "You could've done <b>{n} pushups</b>. You'd be built like a Greek God.", cost: 0.01, icon: "🔱" },
-    { text: "You could've hiked the <b>Appalachian Trail</b> - <b>{n}</b> times. Nature > Pixels.", cost: 2000, icon: "🏔️" },
-    { text: "You could've learned to <b>Box</b> - <b>{n}</b> times. You'd be the dangerous one in the room.", cost: 200, icon: "🥊" },
-    { text: "You could've completed <b>{n} Yoga 30-day challenges</b>. You'd be as flexible as a noodle.", cost: 15, icon: "🧘‍♂️" },
-    { text: "You could've learned to <b>Skateboard</b> - <b>{n}</b> times. Do a kickflip, bro.", cost: 100, icon: "🛹" },
-    { text: "You could've swam the <b>English Channel</b> - <b>{n}</b> times. (Well, with a boat following).", cost: 20, icon: "🏊‍♂️" },
-    { text: "You could've biked across the <b>USA</b> - <b>{n}</b> times. Your quads would be legendary.", cost: 400, icon: "🚲" },
-    { text: "You could've learned <b>Jiu-Jitsu</b> well enough to be a blue belt - <b>{n}</b> times.", cost: 500, icon: "🥋" },
+        <div class="card"
+            style="grid-column: 1 / -1; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 20px 30px; margin-top: 10px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="display: flex; flex-direction: column;">
+                    <span
+                        style="font-size: 0.6rem; font-weight: 800; color: #64748b; letter-spacing: 1px; text-transform: uppercase;">Community
+                        & Social</span>
+                    <div style="display: flex; gap: 15px; align-items: center; margin-top: 5px;">
+                        <a href="https://www.instagram.com/scrolltaxapp/" target="_blank"
+                            style="color: #ffffff; line-height: 0;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
+                        </a>
+                        <a href="https://www.tiktok.com/@scrolltaxapp" target="_blank"
+                            style="color: #fff; line-height: 0;">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path
+                                    d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3V0Z" />
+                            </svg>
+                        </a>
+                        <span onclick="showContact()"
+                            style="color: #fff; cursor: pointer; text-decoration: none; font-size: 0.85rem; font-weight: 800; border-left: 1px solid var(--border); padding-left: 15px;">Contact</span>
 
-    // --- THE "FINANCIAL REGRET" (Money & Spending) ---
-    { text: "You could've earned <b>${n}</b> working a basic side hustle. Think of the freedom.", cost: 0.05, icon: "💰" },
-    { text: "You could've bought <b>{n} Pepperoni Pizzas</b> with the money you <b>didn't</b> earn.", cost: 0.75, icon: "🍕" },
-    { text: "You could've bought <b>{n} pairs of Air Jordan 1s</b>. You'd have a sneaker wall.", cost: 10, icon: "👟" },
-    { text: "You could've paid for <b>{n}</b> years of <b>Netflix</b> by working instead of scrolling.", cost: 8, icon: "📺" },
-    { text: "You've lost enough money to buy <b>{n}</b> fully-loaded <b>MacBook Pros</b>.", cost: 150, icon: "💻" },
-    { text: "You could've funded <b>{n}</b> round-trip flights to <b>Bali</b>.", cost: 40, icon: "🏝️" },
-    { text: "You've lost enough time to earn <b>{n}</b> luxury <b>Rolex</b> watches.", cost: 500, icon: "⌚" },
-    { text: "You could've bought <b>{n}</b> shares of <b>Apple stock</b> and retired slightly earlier.", cost: 10, icon: "🍏" },
-    { text: "You could've paid for <b>{n}</b> months of a <b>Luxury Penthouse</b> in New York.", cost: 200, icon: "🏙️" },
-    { text: "You could've bought <b>{n}</b> brand new <b>Teslas</b>. Zero emissions, zero scrolling.", cost: 2000, icon: "🚗" },
-    { text: "You could've earned enough to buy <b>{n}</b> high-end <b>Espresso Machines</b>.", cost: 30, icon: "☕" },
-    { text: "You could've paid off <b>{n}%</b> of an average student loan.", cost: 50, icon: "💸" },
-    { text: "You could've bought <b>{n}</b> vintage <b>Arcade Cabinets</b>. Real gaming > Mobile scrolling.", cost: 25, icon: "🕹️" },
+                        </a>
+                    </div>
+                </div>
 
-    // --- THE "ENTERTAINMENT & POP CULTURE" ---
-    { text: "You could've watched the entire <b>Shrek</b> series - <b>{n}</b> times. Peak happiness.", cost: 8, icon: "👹" },
-    { text: "You could've watched the entire <b>Marvel Cinematic Universe</b> - <b>{n}</b> times.", cost: 60, icon: "🦸‍♂️" },
-    { text: "You could've played through <b>The Witcher 3</b> - <b>{n}</b> times. Geralt is disappointed.", cost: 100, icon: "🐺" },
-    { text: "You could've watched <b>The Bee Movie</b> - <b>{n}</b> times. According to all known laws of aviation...", cost: 1.5, icon: "🐝" },
-    { text: "You could've watched the <b>Lord of the Rings Extended Edition</b> - <b>{n}</b> times.", cost: 12, icon: "💍" },
-    { text: "You could've watched every episode of <b>One Piece</b> - <b>{n}</b> times. Yes, all of them.", cost: 450, icon: "🏴‍☠️" },
-    { text: "You could've watched <b>Interstellar</b> - <b>{n}</b> times. This little maneuver is costing us 51 years.", cost: 3, icon: "👨‍🚀" },
-    { text: "You could've listened to <b>'Never Gonna Give You Up'</b> - <b>{n}</b> times. Rickrolled by life.", cost: 0.06, icon: "🕺" },
-    { text: "You could've watched <b>The Godfather Trilogy</b> - <b>{n}</b> times and finally understood the hype.", cost: 9, icon: "🌹" },
+                <div style="flex: 1; padding: 0 40px; text-align: left; max-width: 400px;">
+                    <p
+                        style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.5; font-weight: 500; opacity: 0.7;">
+                        ScrollTax is an independent project designed to visualize digital decay. Every share helps wake
+                        another mind.
+                    </p>
+                </div>
 
-    // --- THE "ABSURD & FUNNY" (The Roasts) ---
-    { text: "You could've stared at a <b>Blank Wall</b> for <b>{n}</b> hours and been more productive.", cost: 1, icon: "🧱" },
-    { text: "You could've folded <b>{n}</b> origami cranes. Legend says you'd get a wish. You need it.", cost: 0.1, icon: "🦢" },
-    { text: "You could've counted to <b>{n}</b> million. Just... counting. Out loud.", cost: 300, icon: "🔢" },
-    { text: "You could've watched <b>{n}</b> sunsets. But you chose a 6-inch glowing rectangle.", cost: 0.5, icon: "🌅" },
-    { text: "You could've organized your <b>junk drawer</b> - <b>{n}</b> times. You know the one.", cost: 2, icon: "📎" },
-    { text: "You could've built <b>{n}</b> complex <b>Lego Death Stars</b>. You'd have a cool display at least.", cost: 20, icon: "🧱" },
-    { text: "You could've knitted <b>{n}</b> very long, very ugly sweaters for your neighbors.", cost: 12, icon: "🧶" },
-    { text: "You could've learned to <b>Solve a Rubik's Cube</b> - <b>{n}</b> times. Impressive at parties, maybe.", cost: 5, icon: "🎲" },
-    { text: "You could've cleaned your <b>browser history</b> - <b>{n}</b> times. We know why.", cost: 0.5, icon: "🕵️‍♂️" },
-    { text: "You could've explained the <b>entire plot of Five Nights at Freddy's</b> - <b>{n}</b> times.", cost: 10, icon: "🐻" },
-    { text: "You could've spent <b>{n}</b> hours actually sleeping. Your dark circles are screaming.", cost: 1, icon: "😴" },
-    { text: "You could've grown a <b>Bonsai Tree</b> for <b>{n}</b> hours. It takes patience you clearly don't have.", cost: 50, icon: "🌳" },
-    { text: "You could've practiced <b>Moonwalking</b> until you were smoother than Michael Jackson - <b>{n}</b> times.", cost: 30, icon: "👞" },
-    { text: "You could've built <b>{n}</b> successful <b>Minecraft</b> civilizations.", cost: 100, icon: "⛏️" },
-    { text: "You could've walked to the <b>Gym and back</b> - <b>{n}</b> times. It's only 1 mile away, bro.", cost: 0.5, icon: "🏋️" },
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button onclick="showCredits()"
+                        style="background: transparent; border: 1px solid var(--border); color: #ffffff; padding: 10px 18px; border-radius: 30px; font-size: 0.65rem; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s;"
+                        onmouseover="this.style.borderColor='var(--primary)'"
+                        onmouseout="this.style.borderColor='var(--border)'">Credits</button>
 
-    // --- THE "WORLD-CLASS ACHIEVEMENTS" ---
-    { text: "You could've built <b>{n}</b> profitable <b>SaaS companies</b>. Instead, you're a product.", cost: 500, icon: "🚀" },
-    { text: "You could've learned to <b>Forge a Samurai Sword</b> - <b>{n}</b> times. Sharp.", cost: 80, icon: "🗡️" },
-    { text: "You could've learned to <b>Tame a Falcon</b> - <b>{n}</b> times. Why walk when you can fly?", cost: 200, icon: "🦅" },
-    { text: "You could've built <b>{n}</b> custom <b>Mechanical Keyboards</b>. Clicky and expensive.", cost: 5, icon: "⌨️" },
-    { text: "You could've written <b>{n}</b> hit pop songs. You'd be the next Taylor Swift.", cost: 100, icon: "🎸" },
-    { text: "You could've mastered <b>Espresso Latte Art</b> - <b>{n}</b> times. Your milk foam is currently a mess.", cost: 40, icon: "☕" },
-    { text: "You could've learned <b>Lockpicking</b> - <b>{n}</b> times. (For legal purposes, obviously).", cost: 20, icon: "🔓" },
-    { text: "You could've mastered the <b>Yo-Yo</b> - <b>{n}</b> times. It's making a comeback, trust me.", cost: 10, icon: "🪀" },
-    { text: "You could've learned to <b>Brew your own Beer</b> - <b>{n}</b> times. Drink your regrets.", cost: 50, icon: "🍺" },
-    { text: "You could've learned <b>Calligraphy</b> and written <b>{n}</b> fancy wedding invites.", cost: 30, icon: "✒️" },
-    { text: "You could've mastered <b>Card Counting</b> and been banned from <b>{n}</b> casinos.", cost: 100, icon: "🃏" },
-    { text: "You could've learned to <b>Unicycle</b> - <b>{n}</b> times. Perfect for your circus life.", cost: 15, icon: "🚲" },
-    { text: "You could've mastered <b>Nunchucks</b> - <b>{n}</b> times. Please don't hit your own head.", cost: 40, icon: "🥋" },
-    { text: "You could've learned to <b>Whistle with your fingers</b> - <b>{n}</b> times. Very loud.", cost: 2, icon: "😙" },
-    { text: "You could've memorized every <b>Capital City</b> in the world - <b>{n}</b> times.", cost: 10, icon: "🗺️" },
-    { text: "You could've learned to <b>Identify Birds by their song</b> - <b>{n}</b> times. A true druid.", cost: 50, icon: "🦜" },
-    { text: "You could've learned <b>Glassblowing</b> - <b>{n}</b> times. Hot and dangerous.", cost: 150, icon: "🔥" },
-    { text: "You could've mastered <b>Pottery</b> - <b>{n}</b> times. Ghost (1990) vibes.", cost: 100, icon: "🏺" },
-    { text: "You could've learned to <b>Sail a boat</b> - <b>{n}</b> times. Captain of your own destiny.", cost: 80, icon: "⛵" },
-    { text: "You could've mastered <b>Tax Loopholes</b> - <b>{n}</b> times and saved a fortune.", cost: 60, icon: "⚖️" },
-    { text: "You could've learned to <b>Read Tarot cards</b> - <b>{n}</b> times. The future looks... blurry.", cost: 20, icon: "🔮" },
-    { text: "You could've mastered <b>Origami</b> well enough to fold a life-sized dragon - <b>{n}</b> times.", cost: 200, icon: "🐉" }
-    ];
+                    <a href="https://buymeacoffee.com/scrolltax" target="_blank"
+                        style="background: #ffcc00; color: #000000; padding: 12px 25px; border-radius: 30px; font-weight: 800; font-size: 0.75rem; text-decoration: none; text-transform: uppercase; box-shadow: 0 0 20px rgba(255, 204, 0, 0.3); transition: 0.3s;"
+                        onmouseover="this.style.transform='scale(1.05)'"
+                        onmouseout="this.style.transform='scale(1)'">Support ScrollTax</a>
+                </div>
+            </div>
+        </div>
+        <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+            <div class="modal-card" onclick="event.stopPropagation()">
+                <div id="modalIcon" style="font-size: 3rem; margin-bottom: 20px;">⚡</div>
+                <div class="modal-title" id="modalTitle">Title</div>
+                <p class="modal-body" id="modalBody">Description goes here.</p>
+                <button class="btn-shuffle" style="margin-top: 0;" onclick="closeModal()">Close</button>
+            </div>
+        </div>
 
-    function setHorizon(days, element) {
-        playTick();
-        currentHorizon = days;
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        element.classList.add('active');
-        updateUI();
-    }
+        <!-- CONTACT FORM MODAL -->
+        <div class="contact-overlay" id="contactOverlay" onclick="closeContact()">
+            <div class="contact-card" onclick="event.stopPropagation()">
+                <div style="font-size: 3rem; margin-bottom: 20px;">📩</div>
+                <div class="modal-title">Contact</div>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">Send us feedback or a business
+                    inquiry.</p>
+                <input type="email" id="contactEmail" placeholder="Your email (optional)">
+                <textarea id="contactMessage" placeholder="Your message..."></textarea>
+                <div class="contact-btns">
+                    <button class="btn-cancel" onclick="closeContact()">Cancel</button>
+                    <button class="btn-send" onclick="sendContact()">Send</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            let currentHorizon = 365;
+            let currentFactIndex = 0;
+            let lastRank = "";
 
-    function shuffle() {
-        playShuffle();
-        const card = document.getElementById('roastCard');
-        card.classList.remove('jolt-effect');
-        void card.offsetWidth;
-        card.classList.add('jolt-effect');
-        currentFactIndex = (currentFactIndex + 1) % facts.length;
-        updateUI();
-    }
+            // --- NATIVE SOUND ENGINE ---
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            function playTone(freq, type, duration, vol = 0.1) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            }
+            function playTick() { playTone(800, 'sine', 0.1, 0.03); }
+            function playShuffle() { playTone(300, 'triangle', 0.15, 0.1); setTimeout(() => playTone(450, 'triangle', 0.2, 0.1), 100); }
+            function playDing() { playTone(900, 'sine', 0.4, 0.1); setTimeout(() => playTone(1200, 'sine', 0.6, 0.1), 150); }
+            function playAlarm() { playTone(150, 'sawtooth', 0.8, 0.2); }
 
-    function updateUI() {
-        const daily = document.getElementById('hourInput').value;
-        const totalHours = daily * currentHorizon;
-        const fact = facts[currentFactIndex];
-        
-        const daysLost = (totalHours / 24).toFixed(1);
-        const money = (totalHours * 20).toLocaleString();
-        const leak = ((daily / 24) * 100).toFixed(1);
-        const distanceKm = (totalHours * 0.2).toFixed(1);
+            const facts = [
+                // --- THE "PRODUCTIVE LEGEND" (Skills & Brain) ---
+                { text: "In that time, you could've learned <b>Japanese</b> to a conversational level - <b>{n}</b> times.", cost: 600, icon: "🎎" },
+                { text: "You could've completed <b>Harvard's CS50</b> coding course - <b>{n}</b> times. Imagine the salary.", cost: 80, icon: "👨‍💻" },
+                { text: "You could've read <b>{n}</b> life-changing books. You'd be the smartest person in the room.", cost: 15, icon: "📚" },
+                { text: "You could've earned a <b>Private Pilot License</b> - <b>{n}</b> times. Flying > Scrolling.", cost: 50, icon: "✈️" },
+                { text: "You could've learned to <b>play the Piano</b> well enough to impress a crowd - <b>{n}</b> times.", cost: 400, icon: "🎹" },
+                { text: "You could've mastered <b>Python</b> and automated your entire life - <b>{n}</b> times.", cost: 150, icon: "🐍" },
+                { text: "You could've learned to <b>cook a meal like a Michelin-star chef</b> - <b>{n}</b> times over.", cost: 120, icon: "👨‍🍳" },
+                { text: "You could've finished a <b>Master's Degree</b> - <b>{n}</b> times. Call yourself 'Professor' already.", cost: 1000, icon: "🎓" },
+                { text: "You could've learned <b>Touch Typing</b> - <b>{n}</b> times. You'd be a keyboard wizard.", cost: 15, icon: "⌨️" },
+                { text: "You could've mastered <b>Public Speaking</b> - <b>{n}</b> times. No more shaky knees.", cost: 50, icon: "🎤" },
+                { text: "You could've learned <b>Speed Reading</b> - <b>{n}</b> times. You'd be done with this list by now.", cost: 20, icon: "⚡" },
+                { text: "You could've learned to <b>DJ a festival set</b> - <b>{n}</b> times. Put the phone down, pick up the decks.", cost: 100, icon: "🎧" },
+                { text: "You could've learned <b>Sign Language</b> - <b>{n}</b> times and talked with your hands.", cost: 300, icon: "🤟" },
+                { text: "You could've mastered <b>Chess</b> well enough to beat a grandmaster - <b>{n}</b> times (maybe).", cost: 1500, icon: "♟️" },
+                { text: "You could've learned to <b>animate in 3D</b> - <b>{n}</b> times. You could be making movies.", cost: 400, icon: "🎬" },
+                { text: "You could've learned <b>Digital Marketing</b> - <b>{n}</b> times and escaped the 9-to-5.", cost: 100, icon: "📈" },
+                { text: "You could've mastered <b>Photography</b> - <b>{n}</b> times. Your Instagram would actually be good.", cost: 80, icon: "📸" },
 
-        document.getElementById('hourLabel').innerText = daily + "h";
-        document.getElementById('annualHours').innerText = Math.floor(totalHours).toLocaleString();
-        document.getElementById('moneyLost').innerText = "$" + money;
-        document.getElementById('daysLost').innerText = daysLost;
-        document.getElementById('lifeLeak').innerText = leak + "%";
-        document.getElementById('thumbMileage').innerText = distanceKm + " km";
+                // --- THE "PHYSICAL REPUTATION" (Fitness & Health) ---
+                { text: "You could've gained <b>{n} kg of pure muscle</b> and finally bought shirts that actually fit.", cost: 150, icon: "🦾" },
+                { text: "You could've trained for and run a <b>Full Marathon</b> - <b>{n}</b> times. Your heart misses you.", cost: 120, icon: "🏃‍♂️" },
+                { text: "You could've completed <b>{n}</b> '7-minute workouts'. You'd have abs, not just a thumb cramp.", cost: 0.12, icon: "🏋️‍♂️" },
+                { text: "You could've learned to <b>Backflip</b> - <b>{n}</b> times. Think of the gravity-defying glory.", cost: 40, icon: "🤸‍♂️" },
+                { text: "You could've walked from <b>London to Rome</b> - <b>{n}</b> times. Stand up, your legs are atrophying.", cost: 350, icon: "🚶🏻‍➡️" },
+                { text: "You could've mastered a <b>Handstand</b> - <b>{n}</b> times. The world looks better upside down.", cost: 50, icon: "🤸" },
+                { text: "You could've learned to <b>Surf</b> - <b>{n}</b> times. You're a beach bum in a gamer's body.", cost: 60, icon: "🏄‍♂️" },
+                { text: "You could've done <b>{n} pushups</b>. You'd be built like a Greek God.", cost: 0.01, icon: "🔱" },
+                { text: "You could've hiked the <b>Appalachian Trail</b> - <b>{n}</b> times. Nature > Pixels.", cost: 2000, icon: "🏔️" },
+                { text: "You could've learned to <b>Box</b> - <b>{n}</b> times. You'd be the dangerous one in the room.", cost: 200, icon: "🥊" },
+                { text: "You could've completed <b>{n} Yoga 30-day challenges</b>. You'd be as flexible as a noodle.", cost: 15, icon: "🧘‍♂️" },
+                { text: "You could've learned to <b>Skateboard</b> - <b>{n}</b> times. Do a kickflip, bro.", cost: 100, icon: "🛹" },
+                { text: "You could've swam the <b>English Channel</b> - <b>{n}</b> times. (Well, with a boat following).", cost: 20, icon: "🏊‍♂️" },
+                { text: "You could've biked across the <b>USA</b> - <b>{n}</b> times. Your quads would be legendary.", cost: 400, icon: "🚲" },
+                { text: "You could've learned <b>Jiu-Jitsu</b> well enough to be a blue belt - <b>{n}</b> times.", cost: 500, icon: "🥋" },
 
-        const intensity = (daily / 12) * 100;
-        
-        let status = "";
-        let themePrimary = "";
-        let themeSecondary = "";
-        let overlayOpacity = 0;
+                // --- THE "FINANCIAL REGRET" (Money & Spending) ---
+                { text: "You could've earned <b>${n}</b> working a basic side hustle. Think of the freedom.", cost: 0.05, icon: "💰" },
+                { text: "You could've bought <b>{n} Pepperoni Pizzas</b> with the money you <b>didn't</b> earn.", cost: 0.75, icon: "🍕" },
+                { text: "You could've bought <b>{n} pairs of Air Jordan 1s</b>. You'd have a sneaker wall.", cost: 10, icon: "👟" },
+                { text: "You could've paid for <b>{n}</b> years of <b>Netflix</b> by working instead of scrolling.", cost: 8, icon: "📺" },
+                { text: "You've lost enough money to buy <b>{n}</b> fully-loaded <b>MacBook Pros</b>.", cost: 150, icon: "💻" },
+                { text: "You could've funded <b>{n}</b> round-trip flights to <b>Bali</b>.", cost: 40, icon: "🏝️" },
+                { text: "You've lost enough time to earn <b>{n}</b> luxury <b>Rolex</b> watches.", cost: 500, icon: "⌚" },
+                { text: "You could've bought <b>{n}</b> shares of <b>Apple stock</b> and retired slightly earlier.", cost: 10, icon: "🍏" },
+                { text: "You could've paid for <b>{n}</b> months of a <b>Luxury Penthouse</b> in New York.", cost: 200, icon: "🏙️" },
+                { text: "You could've bought <b>{n}</b> brand new <b>Teslas</b>. Zero emissions, zero scrolling.", cost: 2000, icon: "🚗" },
+                { text: "You could've earned enough to buy <b>{n}</b> high-end <b>Espresso Machines</b>.", cost: 30, icon: "☕" },
+                { text: "You could've paid off <b>{n}%</b> of an average student loan.", cost: 50, icon: "💸" },
+                { text: "You could've bought <b>{n}</b> vintage <b>Arcade Cabinets</b>. Real gaming > Mobile scrolling.", cost: 25, icon: "🕹️" },
 
-        if (intensity <= 25) {
-            status = "Focused Human";
-            themePrimary = "#00f2ff";
-            themeSecondary = "#7000ff";
-            overlayOpacity = 0;
-        } 
-        else if (intensity <= 50) {
-            status = "Less Socially Functional";
-            themePrimary = "#f1c40f";
-            themeSecondary = "#e67e22";
-            overlayOpacity = 0.3;
-        } 
-        else if (intensity <= 75) {
-            status = "Algorithm's Puppet";
-            themePrimary = "#e67e22";
-            themeSecondary = "#d35400";
-            overlayOpacity = 0.6;
-        } 
-        else {
-            status = "Brain Rot Champion";
-            themePrimary = "#ff4757";
-            themeSecondary = "#991b1b";
-            overlayOpacity = 1;
-        }
+                // --- THE "ENTERTAINMENT & POP CULTURE" ---
+                { text: "You could've watched the entire <b>Shrek</b> series - <b>{n}</b> times. Peak happiness.", cost: 8, icon: "👹" },
+                { text: "You could've watched the entire <b>Marvel Cinematic Universe</b> - <b>{n}</b> times.", cost: 60, icon: "🦸‍♂️" },
+                { text: "You could've played through <b>The Witcher 3</b> - <b>{n}</b> times. Geralt is disappointed.", cost: 100, icon: "🐺" },
+                { text: "You could've watched <b>The Bee Movie</b> - <b>{n}</b> times. According to all known laws of aviation...", cost: 1.5, icon: "🐝" },
+                { text: "You could've watched the <b>Lord of the Rings Extended Edition</b> - <b>{n}</b> times.", cost: 12, icon: "💍" },
+                { text: "You could've watched every episode of <b>One Piece</b> - <b>{n}</b> times. Yes, all of them.", cost: 450, icon: "🏴‍☠️" },
+                { text: "You could've watched <b>Interstellar</b> - <b>{n}</b> times. This little maneuver is costing us 51 years.", cost: 3, icon: "👨‍🚀" },
+                { text: "You could've listened to <b>'Never Gonna Give You Up'</b> - <b>{n}</b> times. Rickrolled by life.", cost: 0.06, icon: "🕺" },
+                { text: "You could've watched <b>The Godfather Trilogy</b> - <b>{n}</b> times and finally understood the hype.", cost: 9, icon: "🌹" },
 
-        if (status === "Brain Rot Champion" && lastRank !== "Brain Rot Champion") {
-            playAlarm();
-        }
-        lastRank = status;
+                // --- THE "ABSURD & FUNNY" (The Roasts) ---
+                { text: "You could've stared at a <b>Blank Wall</b> for <b>{n}</b> hours and been more productive.", cost: 1, icon: "🧱" },
+                { text: "You could've folded <b>{n}</b> origami cranes. Legend says you'd get a wish. You need it.", cost: 0.1, icon: "🦢" },
+                { text: "You could've counted to <b>{n}</b> million. Just... counting. Out loud.", cost: 300, icon: "🔢" },
+                { text: "You could've watched <b>{n}</b> sunsets. But you chose a 6-inch glowing rectangle.", cost: 0.5, icon: "🌅" },
+                { text: "You could've organized your <b>junk drawer</b> - <b>{n}</b> times. You know the one.", cost: 2, icon: "📎" },
+                { text: "You could've built <b>{n}</b> complex <b>Lego Death Stars</b>. You'd have a cool display at least.", cost: 20, icon: "🧱" },
+                { text: "You could've knitted <b>{n}</b> very long, very ugly sweaters for your neighbors.", cost: 12, icon: "🧶" },
+                { text: "You could've learned to <b>Solve a Rubik's Cube</b> - <b>{n}</b> times. Impressive at parties, maybe.", cost: 5, icon: "🎲" },
+                { text: "You could've cleaned your <b>browser history</b> - <b>{n}</b> times. We know why.", cost: 0.5, icon: "🕵️‍♂️" },
+                { text: "You could've explained the <b>entire plot of Five Nights at Freddy's</b> - <b>{n}</b> times.", cost: 10, icon: "🐻" },
+                { text: "You could've spent <b>{n}</b> hours actually sleeping. Your dark circles are screaming.", cost: 1, icon: "😴" },
+                { text: "You could've grown a <b>Bonsai Tree</b> for <b>{n}</b> hours. It takes patience you clearly don't have.", cost: 50, icon: "🌳" },
+                { text: "You could've practiced <b>Moonwalking</b> until you were smoother than Michael Jackson - <b>{n}</b> times.", cost: 30, icon: "👞" },
+                { text: "You could've built <b>{n}</b> successful <b>Minecraft</b> civilizations.", cost: 100, icon: "⛏️" },
+                { text: "You could've walked to the <b>Gym and back</b> - <b>{n}</b> times. It's only 1 mile away, bro.", cost: 0.5, icon: "🏋️" },
 
-        const root = document.documentElement;
-        root.style.setProperty('--primary', themePrimary);
-        root.style.setProperty('--secondary', themeSecondary);
-        
-        document.getElementById('statusText').innerText = status;
-        document.getElementById('statusText').style.color = themePrimary;
-        document.getElementById('dangerOverlay').style.opacity = overlayOpacity;
-        document.getElementById('lifeBar').style.width = intensity + "%";
-        document.getElementById('rankFill').style.width = intensity + "%";
-        
-        let result = fact.text.includes("$") ? (totalHours * 20).toLocaleString() : (totalHours / fact.cost).toFixed(1);
-        document.getElementById('factOutput').innerHTML = fact.text.replace("{n}", result);
-        document.getElementById('roastIcon').innerText = fact.icon || "⚡";
-    }
+                // --- THE "WORLD-CLASS ACHIEVEMENTS" ---
+                { text: "You could've built <b>{n}</b> profitable <b>SaaS companies</b>. Instead, you're a product.", cost: 500, icon: "🚀" },
+                { text: "You could've learned to <b>Forge a Samurai Sword</b> - <b>{n}</b> times. Sharp.", cost: 80, icon: "🗡️" },
+                { text: "You could've learned to <b>Tame a Falcon</b> - <b>{n}</b> times. Why walk when you can fly?", cost: 200, icon: "🦅" },
+                { text: "You could've built <b>{n}</b> custom <b>Mechanical Keyboards</b>. Clicky and expensive.", cost: 5, icon: "⌨️" },
+                { text: "You could've written <b>{n}</b> hit pop songs. You'd be the next Taylor Swift.", cost: 100, icon: "🎸" },
+                { text: "You could've mastered <b>Espresso Latte Art</b> - <b>{n}</b> times. Your milk foam is currently a mess.", cost: 40, icon: "☕" },
+                { text: "You could've learned <b>Lockpicking</b> - <b>{n}</b> times. (For legal purposes, obviously).", cost: 20, icon: "🔓" },
+                { text: "You could've mastered the <b>Yo-Yo</b> - <b>{n}</b> times. It's making a comeback, trust me.", cost: 10, icon: "🪀" },
+                { text: "You could've learned to <b>Brew your own Beer</b> - <b>{n}</b> times. Drink your regrets.", cost: 50, icon: "🍺" },
+                { text: "You could've learned <b>Calligraphy</b> and written <b>{n}</b> fancy wedding invites.", cost: 30, icon: "✒️" },
+                { text: "You could've mastered <b>Card Counting</b> and been banned from <b>{n}</b> casinos.", cost: 100, icon: "🃏" },
+                { text: "You could've learned to <b>Unicycle</b> - <b>{n}</b> times. Perfect for your circus life.", cost: 15, icon: "🚲" },
+                { text: "You could've mastered <b>Nunchucks</b> - <b>{n}</b> times. Please don't hit your own head.", cost: 40, icon: "🥋" },
+                { text: "You could've learned to <b>Whistle with your fingers</b> - <b>{n}</b> times. Very loud.", cost: 2, icon: "😙" },
+                { text: "You could've memorized every <b>Capital City</b> in the world - <b>{n}</b> times.", cost: 10, icon: "🗺️" },
+                { text: "You could've learned to <b>Identify Birds by their song</b> - <b>{n}</b> times. A true druid.", cost: 50, icon: "🦜" },
+                { text: "You could've learned <b>Glassblowing</b> - <b>{n}</b> times. Hot and dangerous.", cost: 150, icon: "🔥" },
+                { text: "You could've mastered <b>Pottery</b> - <b>{n}</b> times. Ghost (1990) vibes.", cost: 100, icon: "🏺" },
+                { text: "You could've learned to <b>Sail a boat</b> - <b>{n}</b> times. Captain of your own destiny.", cost: 80, icon: "⛵" },
+                { text: "You could've mastered <b>Tax Loopholes</b> - <b>{n}</b> times and saved a fortune.", cost: 60, icon: "⚖️" },
+                { text: "You could've learned to <b>Read Tarot cards</b> - <b>{n}</b> times. The future looks... blurry.", cost: 20, icon: "🔮" },
+                { text: "You could've mastered <b>Origami</b> well enough to fold a life-sized dragon - <b>{n}</b> times.", cost: 200, icon: "🐉" }
+            ];
 
-    function copyAudit() {
-        playDing();
-        const hours = document.getElementById('annualHours').innerText;
-        const money = document.getElementById('moneyLost').innerText;
-        const rank = document.getElementById('statusText').innerText;
-        const leak = document.getElementById('lifeLeak').innerText;
-        const dist = document.getElementById('thumbMileage').innerText;
+            function setHorizon(days, element) {
+                playTick();
+                currentHorizon = days;
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                element.classList.add('active');
+                updateUI();
+            }
 
-        const report = `📊 MY SCROLLTAX AUDIT:\n\n` +
-                       `🏆 Rank: ${rank}\n` +
-                       `⏰ Time Lost: ${hours} hours\n` +
-                       `💸 Money Lost: ${money}\n` +
-                       `📉 Daily Tax: ${leak}\n` +
-                       `👆 Thumb Distance: ${dist}\n\n` +
-                       `Audit your life at ScrollTax.app`;
+            function shuffle() {
+                playShuffle();
+                const card = document.getElementById('roastCard');
+                card.classList.remove('jolt-effect');
+                void card.offsetWidth;
+                card.classList.add('jolt-effect');
+                currentFactIndex = (currentFactIndex + 1) % facts.length;
+                updateUI();
+            }
 
-        navigator.clipboard.writeText(report);
-        const btn = document.querySelector('.btn-share');
-        const original = btn.innerText;
-        btn.innerText = "COPIED TO CLIPBOARD! 🚀";
-        setTimeout(() => btn.innerText = original, 2000);
-    }
+            function updateUI() {
+                const daily = document.getElementById('hourInput').value;
+                const totalHours = daily * currentHorizon;
+                const fact = facts[currentFactIndex];
 
-    function openModal(icon, title, body) {
-   // playDing();
-    document.getElementById('modalIcon').innerText = icon;
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalBody').innerText = body;
-    document.getElementById('modalOverlay').classList.add('active');
-}
+                const daysLost = (totalHours / 24).toFixed(1);
+                const money = (totalHours * 20).toLocaleString();
+                const leak = ((daily / 24) * 100).toFixed(1);
+                const distanceKm = (totalHours * 0.2).toFixed(1);
 
-function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('active');
-}
+                document.getElementById('hourLabel').innerText = daily + "h";
+                document.getElementById('annualHours').innerText = Math.floor(totalHours).toLocaleString();
+                document.getElementById('moneyLost').innerText = "$" + money;
+                document.getElementById('daysLost').innerText = daysLost;
+                document.getElementById('lifeLeak').innerText = leak + "%";
+                document.getElementById('thumbMileage').innerText = distanceKm + " km";
 
-function showCredits() {
-    openModal("ⓘ", "Credits", "SCROLLTAX | Life Audit Tool\n\nDesign & Dev: Soțan Rareș\nBuild: v1.0.4\n\nReclaim your time.");
-}
+                const intensity = (daily / 12) * 100;
 
-function showContact() {
-    openModal("📩", "Contact", "For feedback or business inquiries, reach out at:\n\nsotaninfo@gmail.com");
-}
+                let status = "";
+                let themePrimary = "";
+                let themeSecondary = "";
+                let overlayOpacity = 0;
 
-    document.getElementById('hourInput').addEventListener('input', playTick);
-    updateUI();
-</script>
+                if (intensity <= 25) {
+                    status = "Focused Human";
+                    themePrimary = "#00f2ff";
+                    themeSecondary = "#7000ff";
+                    overlayOpacity = 0;
+                }
+                else if (intensity <= 50) {
+                    status = "Less Socially Functional";
+                    themePrimary = "#f1c40f";
+                    themeSecondary = "#e67e22";
+                    overlayOpacity = 0.3;
+                }
+                else if (intensity <= 75) {
+                    status = "Algorithm's Puppet";
+                    themePrimary = "#e67e22";
+                    themeSecondary = "#d35400";
+                    overlayOpacity = 0.6;
+                }
+                else {
+                    status = "Brain Rot Champion";
+                    themePrimary = "#ff4757";
+                    themeSecondary = "#991b1b";
+                    overlayOpacity = 1;
+                }
+
+                if (status === "Brain Rot Champion" && lastRank !== "Brain Rot Champion") {
+                    playAlarm();
+                }
+                lastRank = status;
+
+                const root = document.documentElement;
+                root.style.setProperty('--primary', themePrimary);
+                root.style.setProperty('--secondary', themeSecondary);
+
+                document.getElementById('statusText').innerText = status;
+                document.getElementById('statusText').style.color = themePrimary;
+                document.getElementById('lifeBar').style.width = intensity + "%";
+                document.getElementById('rankFill').style.width = intensity + "%";
+
+                let result = fact.text.includes("$") ? (totalHours * 20).toLocaleString() : (totalHours / fact.cost).toFixed(1);
+                document.getElementById('factOutput').innerHTML = fact.text.replace("{n}", result);
+                document.getElementById('roastIcon').innerText = fact.icon || "⚡";
+            }
+
+            function copyAudit() {
+                playDing();
+                const hours = document.getElementById('annualHours').innerText;
+                const money = document.getElementById('moneyLost').innerText;
+                const rank = document.getElementById('statusText').innerText;
+                const leak = document.getElementById('lifeLeak').innerText;
+                const dist = document.getElementById('thumbMileage').innerText;
+
+                const report = `📊 MY SCROLLTAX AUDIT:\n\n` +
+                    `🏆 Rank: ${rank}\n` +
+                    `⏰ Time Lost: ${hours} hours\n` +
+                    `💸 Money Lost: ${money}\n` +
+                    `📉 Daily Tax: ${leak}\n` +
+                    `👆 Thumb Distance: ${dist}\n\n` +
+                    `Audit your life at ScrollTax.app`;
+
+                navigator.clipboard.writeText(report);
+                const btn = document.querySelector('.btn-share');
+                const original = btn.innerText;
+                btn.innerText = "COPIED TO CLIPBOARD! 🚀";
+                setTimeout(() => btn.innerText = original, 2000);
+            }
+
+            function openModal(icon, title, body) {
+                // playDing();
+                const iconEl = document.getElementById('modalIcon');
+                if (icon === 'logo') {
+                    iconEl.innerHTML = '<img src="ScrollTax logo.png" alt="ScrollTax" style="width: 64px; height: 64px; border-radius: 14px;">';
+                } else {
+                    iconEl.innerText = icon;
+                }
+                document.getElementById('modalTitle').innerText = title;
+                document.getElementById('modalBody').innerText = body;
+                document.getElementById('modalOverlay').classList.add('active');
+            }
+
+            function closeModal() {
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
+
+            function showCredits() {
+                openModal("logo", "Credits", "SCROLLTAX | Life Audit Tool\n\nDesign & Dev: Soțan Rareș\nBuild: v1.0.4\n\nReclaim your time.");
+            }
+
+            function showContact() {
+                document.getElementById('contactEmail').value = '';
+                document.getElementById('contactMessage').value = '';
+                document.getElementById('contactOverlay').classList.add('active');
+            }
+            function closeContact() {
+                document.getElementById('contactOverlay').classList.remove('active');
+            }
+            function sendContact() {
+                const email = document.getElementById('contactEmail').value.trim();
+                const message = document.getElementById('contactMessage').value.trim();
+                const sendBtn = document.querySelector('.btn-send');
+                if (!message) {
+                    document.getElementById('contactMessage').style.borderColor = '#ff4757';
+                    setTimeout(() => document.getElementById('contactMessage').style.borderColor = '', 1500);
+                    return;
+                }
+                sendBtn.innerText = 'SENDING...';
+                sendBtn.style.pointerEvents = 'none';
+
+                // Hidden iframe + form POST to bypass CORS on file:// origins
+                const iframeName = '_formspree_' + Date.now();
+                const iframe = document.createElement('iframe');
+                iframe.name = iframeName;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'https://formspree.io/f/mdawrgqk';
+                form.target = iframeName;
+                form.style.display = 'none';
+
+                const f1 = document.createElement('input');
+                f1.name = 'email'; f1.value = email;
+                if (email) form.appendChild(f1);
+
+                const f2 = document.createElement('input');
+                f2.name = 'message'; f2.value = message;
+                form.appendChild(f2);
+
+                document.body.appendChild(form);
+                form.submit();
+
+                iframe.onload = function () {
+                    sendBtn.innerText = 'SENT ✓';
+                    sendBtn.style.background = '#22c55e';
+                    setTimeout(() => {
+                        closeContact();
+                        sendBtn.innerText = 'SEND';
+                        sendBtn.style.background = '';
+                        sendBtn.style.pointerEvents = '';
+                    }, 1500);
+                    setTimeout(() => {
+                        document.body.removeChild(iframe);
+                        document.body.removeChild(form);
+                    }, 3000);
+                };
+            }
+
+            document.getElementById('hourInput').addEventListener('input', playTick);
+            updateUI();
+
+            // --- DYNAMIC AMBIENT BACKGROUND ---
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = () => window.innerWidth;
+            const H = () => window.innerHeight;
+
+            function resizeCanvas() {
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = W() * dpr;
+                canvas.height = H() * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = W() + 'px';
+                canvas.style.height = H() + 'px';
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            // --- Layer 1: Soft Bokeh Orbs (background depth) ---
+            class Orb {
+                constructor() {
+                    this.x = Math.random() * W();
+                    this.y = Math.random() * H();
+                    this.radius = Math.random() * 120 + 60;
+                    this.vx = (Math.random() - 0.5) * 0.3;
+                    this.vy = (Math.random() - 0.5) * 0.25;
+                    this.phase = Math.random() * Math.PI * 2;
+                    this.pulseSpeed = Math.random() * 0.006 + 0.003;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < -this.radius) this.x = W() + this.radius;
+                    if (this.x > W() + this.radius) this.x = -this.radius;
+                    if (this.y < -this.radius) this.y = H() + this.radius;
+                    if (this.y > H() + this.radius) this.y = -this.radius;
+                }
+                draw(t, color) {
+                    const pulse = 0.04 + 0.03 * Math.sin(t * this.pulseSpeed + this.phase);
+                    const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+                    grad.addColorStop(0, color);
+                    grad.addColorStop(1, 'transparent');
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.globalAlpha = pulse;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            // --- Layer 2: Floating Particles with Connections ---
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * W();
+                    this.y = Math.random() * H();
+                    this.vx = (Math.random() - 0.5) * 0.6;
+                    this.vy = (Math.random() - 0.5) * 0.6;
+                    this.radius = Math.random() * 2 + 0.8;
+                    this.phase = Math.random() * Math.PI * 2;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < 0) { this.x = 0; this.vx *= -1; }
+                    if (this.x > W()) { this.x = W(); this.vx *= -1; }
+                    if (this.y < 0) { this.y = 0; this.vy *= -1; }
+                    if (this.y > H()) { this.y = H(); this.vy *= -1; }
+                }
+                draw(t, color) {
+                    const pulse = 0.5 + 0.5 * Math.sin(t * 0.01 + this.phase);
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = color;
+                    ctx.globalAlpha = 0.3 + pulse * 0.5;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            const orbs = [];
+            for (let i = 0; i < 6; i++) orbs.push(new Orb());
+
+            const particles = [];
+            const pCount = Math.min(Math.floor(W() * H() / 15000), 80);
+            for (let i = 0; i < pCount; i++) particles.push(new Particle());
+
+            const CONNECTION_DIST = 180;
+            let time = 0;
+
+            function animate() {
+                time++;
+                ctx.clearRect(0, 0, W(), H());
+
+                const primaryColor = document.documentElement.style.getPropertyValue('--primary').trim() || '#00f2ff';
+
+                // Bokeh orbs (background glow)
+                ctx.globalCompositeOperation = 'lighter';
+                for (let i = 0; i < orbs.length; i++) {
+                    orbs[i].update();
+                    orbs[i].draw(time, primaryColor);
+                }
+                ctx.globalCompositeOperation = 'source-over';
+
+                // Particles + connections
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw(time, primaryColor);
+                }
+
+                // Connection lines
+                ctx.lineWidth = 0.8;
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < CONNECTION_DIST) {
+                            const alpha = (1 - dist / CONNECTION_DIST) * 0.25;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = primaryColor;
+                            ctx.globalAlpha = alpha;
+                            ctx.stroke();
+                            ctx.globalAlpha = 1;
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        </script>
 
 </body>
+
 </html>
