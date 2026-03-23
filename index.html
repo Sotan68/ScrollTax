@@ -697,7 +697,7 @@
                 { text: "You could've mastered <b>Photography</b> - <b>{n}</b> times. Your Instagram would actually be good.", cost: 80, icon: "📸" },
 
                 // --- THE "PHYSICAL REPUTATION" (Fitness & Health) ---
-                { text: "You could've gained <b>{n} kg of pure muscle</b> and finally bought shirts that actually fit.", cost: 150, icon: "🦾" },
+                { text: "You could've gained <b>{n} kg of pure muscle</b> and finally bought shirts that actually fit.", cost: 150, icon: "🦾", max: 40 },
                 { text: "You could've trained for and run a <b>Full Marathon</b> - <b>{n}</b> times. Your heart misses you.", cost: 120, icon: "🏃‍♂️" },
                 { text: "You could've completed <b>{n}</b> '7-minute workouts'. You'd have abs, not just a thumb cramp.", cost: 0.12, icon: "🏋️‍♂️" },
                 { text: "You could've learned to <b>Backflip</b> - <b>{n}</b> times. Think of the gravity-defying glory.", cost: 40, icon: "🤸‍♂️" },
@@ -862,7 +862,7 @@
                 document.getElementById('lifeBar').style.width = intensity + "%";
                 document.getElementById('rankFill').style.width = intensity + "%";
 
-                let result = fact.text.includes("$") ? (totalHours * 20).toLocaleString() : (totalHours / fact.cost).toFixed(1);
+                let result = fact.text.includes("$") ? (totalHours * 20).toLocaleString() : Math.min((totalHours / fact.cost), fact.max || Infinity).toFixed(1);
                 document.getElementById('factOutput').innerHTML = fact.text.replace("{n}", result);
                 document.getElementById('roastIcon').innerText = fact.icon || "⚡";
             }
