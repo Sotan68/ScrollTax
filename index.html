@@ -824,31 +824,31 @@
                 let overlayOpacity = 0;
 
                 if (intensity <= 25) {
-                    status = "Focused Human";
+                    status = "Locked-In Human";
                     themePrimary = "#00f2ff";
                     themeSecondary = "#7000ff";
                     overlayOpacity = 0;
                 }
                 else if (intensity <= 50) {
-                    status = "Less Socially Functional";
+                    status = "Algorithm's Puppet";
                     themePrimary = "#f1c40f";
                     themeSecondary = "#e67e22";
                     overlayOpacity = 0.3;
                 }
                 else if (intensity <= 75) {
-                    status = "Algorithm's Puppet";
+                    status = "Professional Doomscroller";
                     themePrimary = "#e67e22";
                     themeSecondary = "#d35400";
                     overlayOpacity = 0.6;
                 }
                 else {
-                    status = "Brain Rot Champion";
+                    status = "CEO of Wasted Potential";
                     themePrimary = "#ff4757";
                     themeSecondary = "#991b1b";
                     overlayOpacity = 1;
                 }
 
-                if (status === "Brain Rot Champion" && lastRank !== "Brain Rot Champion") {
+                if (status === "CEO of Wasted Potential" && lastRank !== "CEO of Wasted Potential") {
                     playAlarm();
                 }
                 lastRank = status;
