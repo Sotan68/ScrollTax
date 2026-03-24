@@ -486,6 +486,107 @@
             animation: jolt 0.2s ease-in-out;
         }
 
+        /* --- SHARE CARD MODAL --- */
+        .share-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .share-overlay.active {
+            display: flex;
+        }
+
+        .share-card-wrapper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 30px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .share-overlay.active .share-card-wrapper {
+            transform: translateY(0);
+        }
+
+        .share-preview {
+            width: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .share-preview canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .share-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .share-actions button {
+            width: 100%;
+            padding: 11px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.7rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            border: none;
+        }
+
+        .btn-download {
+            background: #fff;
+            color: #020617;
+        }
+
+        .btn-download:hover {
+            background: var(--primary);
+            transform: scale(1.02);
+        }
+
+        .btn-copy-text {
+            background: transparent;
+            color: #cbd5e1;
+            border: 1px solid var(--border) !important;
+        }
+
+        .btn-copy-text:hover {
+            border-color: var(--primary) !important;
+            color: #fff;
+        }
+
+        .btn-close-share {
+            background: transparent;
+            color: #64748b;
+            border: none !important;
+            padding: 10px !important;
+            font-size: 0.7rem !important;
+        }
+
+        .btn-close-share:hover {
+            color: #fff;
+        }
+
         @media (max-width: 768px) {
             .bento-container {
                 grid-template-columns: 1fr;
@@ -572,7 +673,7 @@
         </div>
 
         <div class="card" style="padding: 10px;">
-            <button class="btn-share" onclick="copyAudit()">Share Audit</button>
+            <button class="btn-share" onclick="showShareCard()">Share Audit</button>
         </div>
 
         <div class="card"
@@ -651,6 +752,24 @@
                 </div>
             </div>
         </div>
+
+        <!-- SHARE CARD MODAL -->
+        <div class="share-overlay" id="shareOverlay" onclick="closeShareCard()">
+            <div class="share-card-wrapper" onclick="event.stopPropagation()">
+                <div class="modal-title">Your Audit Card</div>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">Save it. Post it. Wake someone up.
+                </p>
+                <div class="share-preview" id="sharePreview"></div>
+                <div class="share-actions">
+                    <button class="btn-download" onclick="downloadCard()">📥 Download Image</button>
+                    <button class="btn-copy-text" id="btnNativeShare" onclick="nativeShareCard()"
+                        style="display:none;">📤 Share</button>
+                    <button class="btn-copy-text" id="btnCopyText" onclick="copyAuditText()">📋 Copy as Text</button>
+                    <button class="btn-close-share" onclick="closeShareCard()">Close</button>
+                </div>
+            </div>
+        </div>
+
         <script>
             let currentHorizon = 365;
             let currentFactIndex = 0;
@@ -867,27 +986,280 @@
                 document.getElementById('roastIcon').innerText = fact.icon || "⚡";
             }
 
-            function copyAudit() {
-                playDing();
-                const hours = document.getElementById('annualHours').innerText;
-                const money = document.getElementById('moneyLost').innerText;
-                const rank = document.getElementById('statusText').innerText;
-                const leak = document.getElementById('lifeLeak').innerText;
-                const dist = document.getElementById('thumbMileage').innerText;
+            // --- SHARE CARD SYSTEM ---
+            let shareCanvas = null;
 
+            function getAuditData() {
+                return {
+                    hours: document.getElementById('annualHours').innerText,
+                    money: document.getElementById('moneyLost').innerText,
+                    rank: document.getElementById('statusText').innerText,
+                    leak: document.getElementById('lifeLeak').innerText,
+                    dist: document.getElementById('thumbMileage').innerText,
+                    fact: document.getElementById('factOutput').innerText,
+                    icon: document.getElementById('roastIcon').innerText,
+                    daily: document.getElementById('hourInput').value + 'h',
+                    themePrimary: document.documentElement.style.getPropertyValue('--primary').trim() || '#00f2ff',
+                    themeSecondary: document.documentElement.style.getPropertyValue('--secondary').trim() || '#7000ff',
+                };
+            }
+
+            function hexToRgba(hex, alpha) {
+                hex = hex.replace('#', '');
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                return `rgba(${r},${g},${b},${alpha})`;
+            }
+
+            function generateAuditCard() {
+                const d = getAuditData();
+                const W = 1080, H = 1181; // Exact dimensions requested
+                const c = document.createElement('canvas');
+                c.width = W; c.height = H;
+                const ctx = c.getContext('2d');
+
+                // --- Background gradient ---
+                const bg = ctx.createLinearGradient(0, 0, W, H);
+                bg.addColorStop(0, '#020617');
+                bg.addColorStop(0.5, '#0a0f1e');
+                bg.addColorStop(1, '#020617');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, W, H);
+
+                // --- Accent glow orbs ---
+                const drawOrb = (x, y, r, color, alpha) => {
+                    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+                    g.addColorStop(0, hexToRgba(color, alpha));
+                    g.addColorStop(1, 'transparent');
+                    ctx.fillStyle = g;
+                    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+                };
+                drawOrb(200, 150, 300, d.themePrimary, 0.15);
+                drawOrb(1000, 700, 350, d.themeSecondary, 0.12);
+                drawOrb(600, 450, 250, d.themePrimary, 0.08);
+
+                // --- Subtle grid pattern ---
+                ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < W; x += 60) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+                }
+                for (let y = 0; y < H; y += 60) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+                }
+
+                // --- Top section: Logo + branding ---
+                ctx.textAlign = 'center';
+                ctx.fillStyle = d.themePrimary;
+                ctx.font = '800 56px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('SCROLLTAX', W / 2, 100);
+
+                ctx.fillStyle = '#64748b';
+                ctx.font = '600 24px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('YOUR DOOMSCROLL AUDIT', W / 2, 145);
+
+                // --- Divider line ---
+                const drawDivider = (y) => {
+                    const grad = ctx.createLinearGradient(100, y, W - 100, y);
+                    grad.addColorStop(0, 'transparent');
+                    grad.addColorStop(0.5, hexToRgba(d.themePrimary, 0.3));
+                    grad.addColorStop(1, 'transparent');
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(W - 100, y); ctx.stroke();
+                };
+                drawDivider(190);
+
+                // --- Rank section ---
+                ctx.fillStyle = '#64748b';
+                ctx.font = '800 22px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('CURRENT RANK', W / 2, 250);
+
+                ctx.fillStyle = d.themePrimary;
+                ctx.font = '800 64px "Plus Jakarta Sans", sans-serif';
+                ctx.shadowColor = hexToRgba(d.themePrimary, 0.5);
+                ctx.shadowBlur = 25;
+                ctx.fillText(d.rank, W / 2, 325);
+                ctx.shadowBlur = 0;
+
+                // --- Rank bar ---
+                const barY = 365, barW = 500, barH = 7;
+                const barX = (W - barW) / 2;
+                ctx.fillStyle = '#1e293b';
+                roundRect(ctx, barX, barY, barW, barH, 4);
+                ctx.fill();
+                const intensity = (parseInt(d.daily) / 12) * 100;
+                const fillW = (intensity / 100) * barW;
+                ctx.fillStyle = d.themePrimary;
+                roundRect(ctx, barX, barY, fillW, barH, 4);
+                ctx.fill();
+
+                drawDivider(415);
+
+                // --- Main stat: Lost Hours ---
+                ctx.fillStyle = '#64748b';
+                ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('TOTAL LOST HOURS', W / 2, 485);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '800 105px "Plus Jakarta Sans", sans-serif';
+                ctx.shadowColor = hexToRgba(d.themePrimary, 0.3);
+                ctx.shadowBlur = 20;
+                ctx.fillText(d.hours, W / 2, 585);
+                ctx.shadowBlur = 0;
+
+                // --- Stats grid (4 columns, single row) ---
+                const stats = [
+                    { label: 'MONEY TAX', value: d.money },
+                    { label: 'DAYS LOST', value: document.getElementById('daysLost').innerText },
+                    { label: 'DAILY TAX', value: d.leak },
+                    { label: 'THUMB DISTANCE', value: d.dist },
+                ];
+
+                const gridY = 675;
+                const gridSpacing = W / 5;
+                stats.forEach((s, i) => {
+                    const sx = gridSpacing * (i + 1);
+                    ctx.fillStyle = '#475569';
+                    ctx.font = '800 17px "Plus Jakarta Sans", sans-serif';
+                    ctx.fillText(s.label, sx, gridY);
+
+                    ctx.fillStyle = d.themePrimary;
+                    ctx.font = '700 38px "Plus Jakarta Sans", sans-serif';
+                    ctx.fillText(s.value, sx, gridY + 45);
+                });
+
+                drawDivider(785);
+
+                // --- Roast/Fact section ---
+                ctx.fillStyle = '#64748b';
+                ctx.font = '800 27px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('REALITY CHECK', W / 2, 845);
+
+                // Icon
+                ctx.font = '63px sans-serif';
+                ctx.fillText(d.icon, W / 2, 925);
+
+                // Fact text (word wrap)
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '500 33px "Plus Jakarta Sans", sans-serif';
+                const factLines = wrapText(ctx, d.fact, W - 180);
+                factLines.forEach((line, i) => {
+                    ctx.fillText(line, W / 2, 985 + i * 40);
+                });
+                const factEnd = 985 + (factLines.length - 1) * 40;
+
+                // --- Bottom CTA ---
+                const bottomY = factEnd + 65;
+                ctx.fillStyle = d.themePrimary;
+                ctx.font = '800 33px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('scrolltax.site', W / 2, bottomY);
+
+                ctx.fillStyle = '#475569';
+                ctx.font = '500 27px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('Stop being controlled by the algorithm.', W / 2, bottomY + 35);
+
+                return c;
+            }
+
+            function roundRect(ctx, x, y, w, h, r) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+            }
+
+            function wrapText(ctx, text, maxWidth) {
+                const words = text.split(' ');
+                const lines = [];
+                let current = '';
+                for (const word of words) {
+                    const test = current ? current + ' ' + word : word;
+                    if (ctx.measureText(test).width > maxWidth && current) {
+                        lines.push(current);
+                        current = word;
+                    } else {
+                        current = test;
+                    }
+                }
+                if (current) lines.push(current);
+                return lines;
+            }
+
+            function showShareCard() {
+                playDing();
+                const preview = document.getElementById('sharePreview');
+                preview.innerHTML = '';
+                shareCanvas = generateAuditCard();
+                preview.appendChild(shareCanvas);
+
+                // Show native share button on supported devices
+                if (navigator.share && navigator.canShare) {
+                    document.getElementById('btnNativeShare').style.display = 'block';
+                }
+
+                document.getElementById('shareOverlay').classList.add('active');
+            }
+
+            function closeShareCard() {
+                document.getElementById('shareOverlay').classList.remove('active');
+            }
+
+            function downloadCard() {
+                if (!shareCanvas) return;
+                shareCanvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'scrolltax-audit.png';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }, 'image/png');
+
+                const btn = document.querySelector('.btn-download');
+                const orig = btn.innerText;
+                btn.innerText = '✅ SAVED!';
+                setTimeout(() => btn.innerText = orig, 2000);
+            }
+
+            async function nativeShareCard() {
+                if (!shareCanvas) return;
+                try {
+                    const blob = await new Promise(r => shareCanvas.toBlob(r, 'image/png'));
+                    const file = new File([blob], 'scrolltax-audit.png', { type: 'image/png' });
+                    await navigator.share({
+                        title: 'My ScrollTax Audit',
+                        text: 'Check how much time I waste scrolling 💀',
+                        files: [file],
+                    });
+                } catch (e) {
+                    // User cancelled or share failed — silently ignore
+                }
+            }
+
+            function copyAuditText() {
+                const d = getAuditData();
                 const report = `📊 MY SCROLLTAX AUDIT:\n\n` +
-                    `🏆 Rank: ${rank}\n` +
-                    `⏰ Time Lost: ${hours} hours\n` +
-                    `💸 Money Lost: ${money}\n` +
-                    `📉 Daily Tax: ${leak}\n` +
-                    `👆 Thumb Distance: ${dist}\n\n` +
+                    `🏆 Rank: ${d.rank}\n` +
+                    `⏰ Time Lost: ${d.hours} hours\n` +
+                    `💸 Money Lost: ${d.money}\n` +
+                    `📉 Daily Tax: ${d.leak}\n` +
+                    `👆 Thumb Distance: ${d.dist}\n\n` +
                     `Audit your life at scrolltax.site`;
 
                 navigator.clipboard.writeText(report);
-                const btn = document.querySelector('.btn-share');
-                const original = btn.innerText;
-                btn.innerText = "COPIED TO CLIPBOARD! 🚀";
-                setTimeout(() => btn.innerText = original, 2000);
+                const btn = document.getElementById('btnCopyText');
+                const orig = btn.innerText;
+                btn.innerText = 'COPIED TO CLIPBOARD! \u{1F680}';
+                setTimeout(() => btn.innerText = orig, 2000);
             }
 
             function openModal(icon, title, body) {
