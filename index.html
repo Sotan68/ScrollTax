@@ -772,7 +772,6 @@
 
         <script>
             let currentHorizon = 365;
-            let currentFactIndex = 0;
             let lastRank = "";
 
             // --- NATIVE SOUND ENGINE ---
@@ -897,6 +896,8 @@
                 { text: "You could've discovered <b>{n}</b> new tax loopholes and saved a fortune.", cost: 60, icon: "⚖️" },
             ];
 
+            let currentFactIndex = Math.floor(Math.random() * facts.length);
+
             function setHorizon(days, element) {
                 playTick();
                 currentHorizon = days;
@@ -911,7 +912,14 @@
                 card.classList.remove('jolt-effect');
                 void card.offsetWidth;
                 card.classList.add('jolt-effect');
-                currentFactIndex = (currentFactIndex + 1) % facts.length;
+
+                // --- RANDOMIZE INDEX (NO REPEATS) ---
+                let newIndex;
+                do {
+                    newIndex = Math.floor(Math.random() * facts.length);
+                } while (newIndex === currentFactIndex && facts.length > 1);
+
+                currentFactIndex = newIndex;
                 updateUI();
             }
 
@@ -1476,6 +1484,7 @@
 
                 requestAnimationFrame(animate);
             }
+            updateUI();
             animate();
         </script>
 
