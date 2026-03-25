@@ -1020,7 +1020,7 @@
 
             function generateAuditCard() {
                 const d = getAuditData();
-                const W = 1080, H = 1181; // Exact dimensions requested
+                const W = 1080, H = 1920; // Exact dimensions requested
                 const c = document.createElement('canvas');
                 c.width = W; c.height = H;
                 const ctx = c.getContext('2d');
@@ -1056,66 +1056,76 @@
                 }
 
                 // --- Top section: Logo + branding ---
+                let drawY = 150;
                 ctx.textAlign = 'center';
                 ctx.fillStyle = d.themePrimary;
-                ctx.font = '800 56px "Plus Jakarta Sans", sans-serif';
-                ctx.fillText('SCROLLTAX', W / 2, 100);
+                ctx.font = '800 64px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('SCROLLTAX', W / 2, drawY);
 
+                drawY += 50;
                 ctx.fillStyle = '#64748b';
-                ctx.font = '600 24px "Plus Jakarta Sans", sans-serif';
-                ctx.fillText('YOUR DOOMSCROLL AUDIT', W / 2, 145);
+                ctx.font = '600 28px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('YOUR DOOMSCROLL AUDIT', W / 2, drawY);
 
                 // --- Divider line ---
-                const drawDivider = (y) => {
-                    const grad = ctx.createLinearGradient(100, y, W - 100, y);
+                drawY += 80;
+                const drawDivider = (dy) => {
+                    const grad = ctx.createLinearGradient(100, dy, W - 100, dy);
                     grad.addColorStop(0, 'transparent');
                     grad.addColorStop(0.5, hexToRgba(d.themePrimary, 0.3));
                     grad.addColorStop(1, 'transparent');
                     ctx.strokeStyle = grad;
                     ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.moveTo(100, y); ctx.lineTo(W - 100, y); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(100, dy); ctx.lineTo(W - 100, dy); ctx.stroke();
                 };
-                drawDivider(190);
+                drawDivider(drawY);
 
                 // --- Rank section ---
+                drawY += 80;
                 ctx.fillStyle = '#64748b';
-                ctx.font = '800 22px "Plus Jakarta Sans", sans-serif';
-                ctx.fillText('CURRENT RANK', W / 2, 250);
+                ctx.font = '800 26px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('CURRENT RANK', W / 2, drawY);
 
+                drawY += 70;
                 ctx.fillStyle = d.themePrimary;
-                ctx.font = '800 64px "Plus Jakarta Sans", sans-serif';
+                ctx.font = '800 72px "Plus Jakarta Sans", sans-serif';
                 ctx.shadowColor = hexToRgba(d.themePrimary, 0.5);
                 ctx.shadowBlur = 25;
-                ctx.fillText(d.rank, W / 2, 325);
+                ctx.fillText(d.rank, W / 2, drawY);
                 ctx.shadowBlur = 0;
 
                 // --- Rank bar ---
-                const barY = 365, barW = 500, barH = 7;
+                drawY += 50;
+                const barW = 600, barH = 10;
                 const barX = (W - barW) / 2;
                 ctx.fillStyle = '#1e293b';
-                roundRect(ctx, barX, barY, barW, barH, 4);
+                roundRect(ctx, barX, drawY, barW, barH, 5);
                 ctx.fill();
                 const intensity = (parseInt(d.daily) / 12) * 100;
                 const fillW = (intensity / 100) * barW;
                 ctx.fillStyle = d.themePrimary;
-                roundRect(ctx, barX, barY, fillW, barH, 4);
+                roundRect(ctx, barX, drawY, fillW, barH, 5);
                 ctx.fill();
 
-                drawDivider(415);
+                drawY += 80;
+                drawDivider(drawY);
 
                 // --- Main stat: Lost Hours ---
+                drawY += 80;
                 ctx.fillStyle = '#64748b';
-                ctx.font = '800 24px "Plus Jakarta Sans", sans-serif';
-                ctx.fillText('TOTAL LOST HOURS', W / 2, 485);
+                ctx.font = '800 28px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('TOTAL LOST HOURS', W / 2, drawY);
 
+                drawY += 120;
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '800 105px "Plus Jakarta Sans", sans-serif';
+                ctx.font = '800 130px "Plus Jakarta Sans", sans-serif';
                 ctx.shadowColor = hexToRgba(d.themePrimary, 0.3);
-                ctx.shadowBlur = 20;
-                ctx.fillText(d.hours, W / 2, 585);
+                ctx.shadowBlur = 25;
+                ctx.fillText(d.hours, W / 2, drawY);
                 ctx.shadowBlur = 0;
 
-                // --- Stats grid (4 columns, single row) ---
+                // --- Stats grid (2x2) ---
+                drawY += 100;
                 const stats = [
                     { label: 'MONEY TAX', value: d.money },
                     { label: 'DAYS LOST', value: document.getElementById('daysLost').innerText },
@@ -1123,48 +1133,55 @@
                     { label: 'THUMB DISTANCE', value: d.dist },
                 ];
 
-                const gridY = 675;
-                const gridSpacing = W / 5;
+                const col1X = W / 3;
+                const col2X = 2 * W / 3;
+
                 stats.forEach((s, i) => {
-                    const sx = gridSpacing * (i + 1);
+                    const sx = (i % 2 === 0) ? col1X : col2X;
+                    const sy = drawY + (Math.floor(i / 2) * 120);
+
                     ctx.fillStyle = '#475569';
-                    ctx.font = '800 17px "Plus Jakarta Sans", sans-serif';
-                    ctx.fillText(s.label, sx, gridY);
+                    ctx.font = '800 18px "Plus Jakarta Sans", sans-serif';
+                    ctx.fillText(s.label, sx, sy);
 
                     ctx.fillStyle = d.themePrimary;
-                    ctx.font = '700 38px "Plus Jakarta Sans", sans-serif';
-                    ctx.fillText(s.value, sx, gridY + 45);
+                    ctx.font = '700 48px "Plus Jakarta Sans", sans-serif';
+                    ctx.fillText(s.value, sx, sy + 55);
                 });
 
-                drawDivider(785);
+                drawY += 280;
+                drawDivider(drawY);
 
                 // --- Roast/Fact section ---
+                drawY += 90;
                 ctx.fillStyle = '#64748b';
-                ctx.font = '800 27px "Plus Jakarta Sans", sans-serif';
-                ctx.fillText('REALITY CHECK', W / 2, 845);
+                ctx.font = '800 28px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('REALITY CHECK', W / 2, drawY);
 
                 // Icon
-                ctx.font = '63px sans-serif';
-                ctx.fillText(d.icon, W / 2, 925);
+                drawY += 110;
+                ctx.font = '100px sans-serif';
+                ctx.fillText(d.icon, W / 2, drawY);
 
                 // Fact text (word wrap)
+                drawY += 80;
                 ctx.fillStyle = '#cbd5e1';
-                ctx.font = '500 33px "Plus Jakarta Sans", sans-serif';
+                ctx.font = '500 40px "Plus Jakarta Sans", sans-serif';
                 const factLines = wrapText(ctx, d.fact, W - 180);
                 factLines.forEach((line, i) => {
-                    ctx.fillText(line, W / 2, 985 + i * 40);
+                    ctx.fillText(line, W / 2, drawY + i * 55);
                 });
-                const factEnd = 985 + (factLines.length - 1) * 40;
 
                 // --- Bottom CTA ---
-                const bottomY = factEnd + 65;
+                drawY += (factLines.length * 55) + 100;
                 ctx.fillStyle = d.themePrimary;
-                ctx.font = '800 33px "Plus Jakarta Sans", sans-serif';
-                ctx.fillText('scrolltax.site', W / 2, bottomY);
+                ctx.font = '800 40px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('scrolltax.site', W / 2, drawY);
 
+                drawY += 50;
                 ctx.fillStyle = '#475569';
-                ctx.font = '500 27px "Plus Jakarta Sans", sans-serif';
-                ctx.fillText('Stop being controlled by the algorithm.', W / 2, bottomY + 35);
+                ctx.font = '500 30px "Plus Jakarta Sans", sans-serif';
+                ctx.fillText('Stop being controlled by the algorithm.', W / 2, drawY);
 
                 return c;
             }
